@@ -506,110 +506,39 @@ func init() {
 ```
 </Examples>
 
-<Task id="1" points="10">
-<Title>Задание 1: Базовая структура CLI</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: CLI для capstone (migrate/seed/admin/health)</Title>
 <Prompt>
-Создайте CLI с корневой командой и подкомандами.
+Сделайте CLI‑утилиту для вашего capstone‑проекта (REST или gRPC), чтобы управлять окружением и админ‑операциями.
+
+### Требования
+
+1) **Команды**
+Реализуйте минимум 3 команды:
+- `migrate up` — применить миграции (можно позже заменить на отдельный инструмент)
+- `admin create --email ... --password ...` — создать admin пользователя
+- `health` — проверить доступность сервиса/БД (на ваш выбор)
+
+2) **Конфигурация**
+- Поддержка ENV + флагов (Viper опционально, но приветствуется)
+- Единый конфиг объект, который шарится между командами
+
+3) **UX**
+- Понятные сообщения об ошибках
+- `--help` работает на корне и на подкомандах
+
+4) **Безопасность**
+- Пароль не логируйте
+- Подумайте, где хранить секреты (минимум: через ENV)
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Todo CLI</Title>
-<Prompt>
-Создайте команды для управления задачами.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Конфигурация с Viper</Title>
-<Prompt>
-Интегрируйте Viper для конфигурации.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="4" points="10">
-<Title>Задание 4: Интерактивный режим</Title>
-<Prompt>
-Добавьте интерактивный режим с подтверждениями.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="5" points="10">
-<Title>Задание 5: Вывод в разных форматах</Title>
-<Prompt>
-Добавьте поддержку JSON/YAML/Table вывода.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-// TODO: Работа с JSON
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
+<Criteria>
+- CLI собирается и команды реально выполняются
+- `migrate up` и `admin create` идемпотентны или корректно обрабатывают повторный запуск
+- Конфиг не размазан по коду, а собран в одном месте
+</Criteria>
+<Hints>
+- Начните с `cobra init` или ручной структуры `rootCmd` + `Execute()`.
+- Для локальной самопроверки удобно добавить `Makefile` с целями `make migrate`, `make admin`.
+</Hints>
 </Task>

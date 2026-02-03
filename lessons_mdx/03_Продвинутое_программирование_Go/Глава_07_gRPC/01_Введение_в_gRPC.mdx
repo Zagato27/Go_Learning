@@ -605,87 +605,49 @@ func ChainUnaryInterceptors(interceptors ...grpc.UnaryServerInterceptor) grpc.Un
 ```
 </Examples>
 
-<Task id="1" points="10">
-<Title>Задание 1: Proto файл и генерация</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: gRPC capstone — proto, генерация, server/client, базовый interceptor</Title>
 <Prompt>
-Создайте .proto файл и сгенерируйте код.
+Начните (или продолжите) **gRPC capstone** и реализуйте базовую вертикаль: proto → генерация → сервер → клиент.
+
+Ориентир: `lessons_mdx/Проекты/capstone-grpc.md`.
+
+### Требования
+
+1) **Proto контракт**
+- Создайте `users/v1/users.proto` (пакет `users.v1`)
+- RPC минимум:
+  - `CreateUser`
+  - `GetUser`
+  - `ListUsers` (пагинация)
+
+2) **Генерация кода**
+- Настройте генерацию (на выбор):
+  - `protoc` + `protoc-gen-go` + `protoc-gen-go-grpc`, или
+  - `buf` (рекомендовано)
+
+3) **Сервер**
+- Поднимите gRPC сервер, зарегистрируйте сервис
+- Реализуйте in-memory storage на старте (БД можно позже)
+
+4) **Клиент**
+- Напишите небольшой CLI/скрипт, который вызывает `CreateUser` и `GetUser`
+
+5) **Interceptor**
+- Добавьте unary interceptor для логирования (метод, latency, status)
+
+6) **Опционально**
+- Добавьте server streaming метод (например, `ListUsersStream`)
+
 </Prompt>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: gRPC Server</Title>
-<Prompt>
-Реализуйте gRPC сервер.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import (
-    "errors"
-    "fmt"
-    "net/http"
-    "os"
-)
-
-// TODO: Реализуйте HTTP обработчик
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="3" points="10">
-<Title>Задание 3: gRPC Client</Title>
-<Prompt>
-Создайте клиент для вызова сервиса.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="4" points="10">
-<Title>Задание 4: Interceptor для логирования</Title>
-<Prompt>
-Добавьте interceptor для логирования запросов.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import (
-    "fmt"
-    "net/http"
-)
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="5" points="15">
-<Title>Задание 5: Server Streaming</Title>
-<Prompt>
-Реализуйте server-side streaming.
-</Prompt>
+<Criteria>
+- Генерация кода воспроизводима одной командой (`make generate` или `buf generate`)
+- Сервер стартует и принимает запросы
+- Клиент умеет создать пользователя и получить его по ID
+- Логи interceptor’а содержат метод и результат вызова
+</Criteria>
+<Hints>
+- Для локальных тестов удобно использовать `bufconn` (in-memory transport) — это пригодится дальше.
+- Для статусов ошибок используйте `status.Error(codes.NotFound, ...)` и т.п.
+</Hints>
 </Task>

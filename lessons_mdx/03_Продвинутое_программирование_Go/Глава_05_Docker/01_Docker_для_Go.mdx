@@ -497,23 +497,45 @@ func (h *HealthChecker) Check(w http.ResponseWriter, r *http.Request) {
 ```
 </Examples>
 
-<Task id="1" points="15">
-<Title>Задание 1: Multi-stage Dockerfile</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Docker для capstone (multi-stage + docker-compose)</Title>
 <Prompt>
-Создайте оптимизированный Dockerfile для вашего приложения.
-</Prompt>
-</Task>
+Контейнеризируйте capstone‑сервис и соберите локальное окружение через Docker Compose.
 
-<Task id="2" points="15">
-<Title>Задание 2: Docker Compose</Title>
-<Prompt>
-Настройте полное окружение с PostgreSQL и Redis.
-</Prompt>
-</Task>
+Можно делать для REST capstone (предпочтительно), либо для gRPC capstone — принципы одинаковые.
 
-<Task id="3" points="10">
-<Title>Задание 3: Development Setup с Air</Title>
-<Prompt>
-Настройте hot reload для разработки.
+### Требования
+
+1) **Dockerfile (multi-stage)**
+- builder stage на `golang:1.22`
+- финальный stage: `scratch`/`distroless`/`alpine` (объясните выбор в README)
+- сборка с `CGO_ENABLED=0` (если применимо), `-trimpath`, `-ldflags "-s -w"`
+- приложение запускается как отдельный бинарник
+
+2) **docker-compose**
+- минимум сервисы:
+  - app
+  - postgres (для REST) / или зависимости по вашему проекту
+- проброс портов и переменных окружения
+- тома для данных Postgres
+
+3) **Health**
+- добавьте `GET /healthz` (REST) или отдельный health endpoint
+- настройте `healthcheck` в docker-compose для app (и БД, если хотите)
+
+4) **README**
+- как собрать образ
+- как поднять compose
+- как проверить, что сервис жив
+
 </Prompt>
+<Criteria>
+- `docker compose up --build` поднимает окружение без ручных шагов
+- После старта `curl`/`grpcurl` показывает, что сервис отвечает
+- Есть понятный README и переменные окружения задокументированы
+</Criteria>
+<Hints>
+- Старайтесь не тащить в рантайм stage лишние файлы (исходники, go toolchain).
+- Для compose удобно иметь `depends_on` и healthchecks, чтобы app не стартовал “в пустоту”.
+</Hints>
 </Task>

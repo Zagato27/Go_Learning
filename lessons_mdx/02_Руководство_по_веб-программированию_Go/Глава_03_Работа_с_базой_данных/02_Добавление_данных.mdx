@@ -488,107 +488,12 @@ if r.Method == http.MethodPost {
 ```
 </Pitfalls>
 
-<Task id="1" points="10">
-<Title>Задание 1: Redis клиент</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Добавление данных (INSERT + возврат ID + PRG)</Title>
 <Prompt>
-Подключитесь к Redis.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Redis: rdb := redis.NewClient(&redis.Options{Addr: \"localhost:6379\"})")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Redis: rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="10">
-<Title>Задание 2: Redis GET/SET</Title>
-<Prompt>
-Базовые операции Redis.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("GET/SET: rdb.Set(ctx, \"key\", \"value\", 0); rdb.Get(ctx, \"key\")")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-GET/SET: rdb.Set(ctx, "key", "value", 0); rdb.Get(ctx, "key")
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="10">
-<Title>Задание 3: Redis TTL</Title>
-<Prompt>
-Установите время жизни ключа.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("TTL: rdb.Set(ctx, \"key\", \"value\", 1*time.Hour)")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-TTL: rdb.Set(ctx, "key", "value", 1*time.Hour)
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="20">
-<Title>Задание 4: Кеширование в Redis</Title>
-<Prompt>
-Кешируйте результаты запросов.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Кеш: check cache -> return OR fetch -> store -> return")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Кеш: check cache -> return OR fetch -> store -> return
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="20">
-<Title>Задание 5: Redis Pub/Sub</Title>
-<Prompt>
-Используйте Pub/Sub.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Pub/Sub: rdb.Publish(), rdb.Subscribe()")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Pub/Sub: rdb.Publish(), rdb.Subscribe()
-</ExpectedOutput>
+Продолжите мини‑приложение и доведите создание задачи до “нормального” состояния: запись в БД, возврат ID, корректный HTTP ответ и отсутствие дублей при refresh.\n\n### Требования\n\n1) **Repository.CreateTask**\n- Реализуйте метод создания задачи в БД\n- Возвращайте `id` созданной записи\n- Используйте `context.Context` и плейсхолдеры\n\n2) **HTTP API (JSON)**\n- `POST /api/v1/tasks`:\n  - 201\n  - в ответе возвращает созданную задачу с `id`\n  - валидирует вход (`title` обязателен)\n\n3) **HTML форма**\n- `POST /tasks` создаёт задачу и делает redirect на `/tasks/{id}` (PRG)\n\n4) **Ошибки**\n- Если пользователь прислал пустой `title` → 400 (API) / сообщение на форме (HTML)\n\n</Prompt>
+<Criteria>
+- Создание задачи работает и через API, и через HTML форму\n+- После refresh страницы результата (после редиректа) задача не дублируется\n+- В БД есть реальная запись (проверьте через `GET /api/v1/tasks` или sqlite клиент)\n+- Код не использует конкатенацию SQL строк с данными пользователя\n+</Criteria>
+<Hints>
+- Для SQLite:\n  - можно использовать `res, err := db.ExecContext(ctx, \"INSERT ...\", ...)` и `res.LastInsertId()`.\n- Для PRG используйте `http.StatusSeeOther`.\n- Самопроверка:\n  - `curl -i -X POST http://localhost:8080/api/v1/tasks -H \"Content-Type: application/json\" -d '{\"title\":\"write sql\"}'`\n  - `curl -i -X POST http://localhost:8080/api/v1/tasks -H \"Content-Type: application/json\" -d '{\"title\":\"\"}'`\n+</Hints>
 </Task>

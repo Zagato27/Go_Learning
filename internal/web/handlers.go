@@ -153,6 +153,7 @@ func (s *Server) Router() http.Handler {
 	r.Post("/api/notes/lesson/{id}", s.handleSaveNote)
 	r.Post("/api/run", s.handleRun)
 	r.Post("/api/check", s.handleCheck)
+	r.Post("/api/tasks/{id}/complete", s.handleCompleteTask)
 
 	return r
 }
@@ -436,6 +437,66 @@ func (s *Server) handleCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.jsonResponse(w, result)
+}
+
+// handleCompleteTask отмечает manual‑задание выполненным (self-report) и начисляет очки один раз.
+func (s *Server) handleCompleteTask(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	taskID, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || taskID <= 0 {
+		s.badRequest(w, "Invalid task ID")
+		return
+	}
+
+	task, err := s.contentRepo.GetTaskByID(taskID)
+	if err != nil {
+		s.serverError(w, err)
+		return
+	}
+	if task == nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	if strings.TrimSpace(task.Mode) != "manual" {
+		s.badRequest(w, "Task is not manual")
+		return
+	}
+
+	alreadySolved, err := s.progressRepo.IsTaskSolvedSuccessfully(taskID)
+	if err != nil {
+		s.serverError(w, err)
+		return
+	}
+
+	pointsAwarded := 0
+	if !alreadySolved {
+		// Создаём success-submission (для бейджа «✅ Выполнено» и истории)
+		submission := &progress.Submission{
+			TaskID: taskID,
+			Code:   "[manual]",
+			Status: "success",
+			Stdout: "",
+			Stderr: "",
+		}
+		if err := s.progressRepo.CreateSubmission(submission); err != nil {
+			s.serverError(w, err)
+			return
+		}
+
+		// Начисляем очки только при первом выполнении
+		if err := s.progressRepo.SetPracticeDone(task.LessonID, task.Points); err != nil {
+			s.serverError(w, err)
+			return
+		}
+
+		pointsAwarded = task.Points
+	}
+
+	s.jsonResponse(w, map[string]interface{}{
+		"success":        true,
+		"points_awarded": pointsAwarded,
+	})
 }
 
 // --- Helpers ---

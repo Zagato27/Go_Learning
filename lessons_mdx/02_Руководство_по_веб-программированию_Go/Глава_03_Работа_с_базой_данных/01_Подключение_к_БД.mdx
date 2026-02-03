@@ -505,107 +505,49 @@ rows.Scan(&id, &name)  // SELECT id, name
 ```
 </Pitfalls>
 
-<Task id="1" points="15">
-<Title>Задание 1: Prometheus metrics</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Подключение к БД (database/sql) и хранение задач</Title>
 <Prompt>
-Добавьте метрики.
+Сделайте так, чтобы ваш сервис **хранил задачи в базе данных**, а не в памяти.
+
+Для простоты используйте **SQLite** (файл), но оформляйте всё так, как будто это “настоящий прод” (контекст, таймауты, аккуратные ошибки).
+
+### Требования
+
+1) **Подключение**
+- Вынесите DSN/путь к БД в конфиг (ENV/флаг)
+- На старте приложения:
+  - `sql.Open(...)`
+  - `PingContext` с таймаутом
+  - настройка пула (хотя бы `SetMaxOpenConns`, `SetMaxIdleConns`, `SetConnMaxLifetime`)
+
+2) **Схема**
+- Создайте таблицу `tasks` (id, title, done, created_at)
+- Схему создавайте при старте (простым `CREATE TABLE IF NOT EXISTS ...`) или через простую миграцию (по желанию)
+
+3) **Репозиторий**
+- Вынесите SQL в слой репозитория (интерфейс + реализация)
+- Все запросы должны использовать `context.Context`
+- Никаких конкатенаций SQL строк с пользовательским вводом (только плейсхолдеры)
+
+4) **Интеграция с API/UI**
+- `POST /api/v1/tasks` создаёт запись в БД
+- `GET /api/v1/tasks` читает из БД
+- После перезапуска сервера данные сохраняются
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Metrics: promhttp.Handler() на /metrics")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Metrics: promhttp.Handler() на /metrics
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Counter метрика</Title>
-<Prompt>
-Создайте счётчик.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Counter: promauto.NewCounter(prometheus.CounterOpts{...})")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Counter: promauto.NewCounter(prometheus.CounterOpts{...})
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Histogram метрика</Title>
-<Prompt>
-Измеряйте время запросов.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Histogram: promauto.NewHistogram для latency")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Histogram: promauto.NewHistogram для latency
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="15">
-<Title>Задание 4: Labels</Title>
-<Prompt>
-Добавьте labels к метрикам.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Labels: counter.WithLabelValues(\"method\", \"path\")")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Labels: counter.WithLabelValues("method", "path")
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="10">
-<Title>Задание 5: Grafana dashboard</Title>
-<Prompt>
-Визуализируйте метрики.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Grafana: dashboards для request rate, latency, errors")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Grafana: dashboards для request rate, latency, errors
-</ExpectedOutput>
+<Criteria>
+- После рестарта сервера созданные задачи не пропадают
+- Все SQL запросы используют плейсхолдеры (`?`/`$1` — в зависимости от драйвера)
+- Есть минимальная обработка ошибок: 400/404/500 (не “panic”)
+- Подключение к БД делается один раз на старте и переиспользуется
+</Criteria>
+<Hints>
+- Для таймаута: `ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)`.
+- Для схемы: начните с `CREATE TABLE IF NOT EXISTS tasks (...);`.
+- Самопроверка:
+  - создать задачу
+  - перезапустить сервер
+  - убедиться, что `GET /api/v1/tasks` возвращает ту же задачу
+</Hints>
 </Task>

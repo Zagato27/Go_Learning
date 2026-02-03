@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initStatusButtons();
     initCodeEditors();
+    initManualTasks();
     initNotesEditor();
 });
 
@@ -190,6 +191,80 @@ function initCodeEditors() {
             } finally {
                 checkBtn.disabled = false;
                 checkBtn.textContent = '✓ Проверить';
+            }
+        });
+    });
+}
+
+// ========================================
+// Manual Tasks (выполнение в IDE)
+// ========================================
+
+function initManualTasks() {
+    document.querySelectorAll('.task-card[data-task-mode="manual"]').forEach(card => {
+        const taskId = card.dataset.taskId;
+        const completeBtn = card.querySelector('.complete-btn');
+        const outputDiv = card.querySelector('.task-output');
+        const outputContent = card.querySelector('.output-content');
+
+        if (!completeBtn || !taskId) return;
+
+        completeBtn.addEventListener('click', async () => {
+            completeBtn.disabled = true;
+            const oldText = completeBtn.textContent;
+            completeBtn.textContent = '⏳ Сохраняем...';
+
+            if (outputDiv && outputContent) {
+                outputDiv.style.display = 'block';
+                outputDiv.className = 'task-output';
+                outputContent.textContent = 'Отмечаем выполнение...';
+            }
+
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/complete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || `HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                const points = result.points_awarded || 0;
+
+                if (outputDiv && outputContent) {
+                    outputDiv.className = 'task-output success';
+                    let message = '✅ Задание отмечено выполненным.';
+                    if (points) {
+                        message += `\n🏆 +${points} очков!`;
+                    }
+                    outputContent.textContent = message;
+                }
+
+                // Обновляем бейдж очков на "Выполнено"
+                const pointsBadge = card.querySelector('.task-points');
+                if (pointsBadge && !pointsBadge.classList.contains('completed')) {
+                    pointsBadge.textContent = '✅ Выполнено';
+                    pointsBadge.classList.add('completed');
+                }
+                card.setAttribute('data-completed', 'true');
+
+                // Закрываем кнопку (или оставляем disabled)
+                completeBtn.textContent = '✅ Выполнено';
+
+                // Обновляем статистику в шапке
+                updateHeaderStats();
+            } catch (error) {
+                completeBtn.disabled = false;
+                completeBtn.textContent = oldText;
+
+                if (outputDiv && outputContent) {
+                    outputDiv.className = 'task-output error';
+                    outputContent.textContent = 'Ошибка: ' + error.message;
+                }
             }
         });
     });

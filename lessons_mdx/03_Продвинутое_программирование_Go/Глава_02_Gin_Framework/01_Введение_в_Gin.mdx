@@ -749,107 +749,50 @@ if err != nil {
 ```
 </Pitfalls>
 
-<Task id="1" points="15">
-<Title>Задание 1: CRUD API для Product</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Gin — каркас REST API для capstone</Title>
 <Prompt>
-Создайте полный CRUD API.
-</Prompt>
-<StarterCode>
-```go
-package main
+Начните (или продолжите) реализацию **REST capstone** и соберите базовый HTTP слой на Gin.
 
-import "fmt"
+См. требования проекта: `/projects` или `lessons_mdx/Проекты/capstone-rest.md`.
 
-// TODO: Реализуйте решение согласно заданию
+### Требования
 
-func main() {
-    // Ваш код здесь
-    
-}
+1) **Сервер и роутинг**
+- Gin router с группой `/api/v1`
+- Эндпоинты (минимум):
+  - `GET /api/v1/healthz`
+  - `GET /api/v1/products`
+  - `POST /api/v1/products` (admin, пока можно заглушку)
+
+2) **Binding + Validation**
+- Для `POST /products` используйте `ShouldBindJSON` и валидацию struct‑тегов (`binding:"required"` и т.п.)
+- При ошибке валидации возвращайте 400 в стандартизированном формате ошибки
+
+3) **Middleware**
+- request_id middleware (генерировать, если не пришёл)
+- logging middleware (метод, путь, статус, latency, request_id)
+- recovery middleware
+
+4) **Единый формат ошибок**
+- Определите JSON схему ошибки, например:
+
+```json
+{ "error": { "code": "invalid_argument", "message": "..." } }
 ```
-</StarterCode>
-</Task>
 
-<Task id="2" points="15">
-<Title>Задание 2: Custom Middleware</Title>
-<Prompt>
-Напишите middleware для логирования и аутентификации.
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="3" points="10">
-<Title>Задание 3: Custom Validator</Title>
-<Prompt>
-Создайте custom validator для телефонных номеров.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="4" points="10">
-<Title>Задание 4: Error Handling</Title>
-<Prompt>
-Создайте централизованную обработку ошибок.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="5" points="10">
-<Title>Задание 5: Группировка и версионирование API</Title>
-<Prompt>
-Создайте структурированный API с версионированием.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Определите структуру
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
+<Criteria>
+- Сервер запускается и отдаёт `/api/v1/healthz`
+- `POST /api/v1/products` валидируется: пустое имя/цена → 400
+- В логах на каждый запрос есть `request_id` и статус ответа
+- Ошибки возвращаются единообразно (не разные форматы по разным handler’ам)
+</Criteria>
+<Hints>
+- Начните с `r := gin.New(); r.Use(gin.Recovery())` и добавьте свои middleware.
+- Для request_id можно использовать `github.com/google/uuid` или свой простой генератор.
+- Самопроверка:
+  - `curl -i http://localhost:8080/api/v1/healthz`
+  - `curl -i -X POST http://localhost:8080/api/v1/products -H \"Content-Type: application/json\" -d '{}'`
+</Hints>
 </Task>

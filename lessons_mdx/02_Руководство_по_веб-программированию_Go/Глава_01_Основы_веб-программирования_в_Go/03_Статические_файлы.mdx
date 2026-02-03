@@ -427,107 +427,43 @@ http.Handle("/static/",
 ```
 </Pitfalls>
 
-<Task id="1" points="10">
-<Title>Задание 1: Swagger/OpenAPI</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Статические файлы (CSS/JS) + безопасная раздача</Title>
 <Prompt>
-Документируйте API.
+Продолжите мини‑приложение и добавьте поддержку статики.
+
+**Цель:** подключить CSS/JS на страницу, раздавать файлы через `/static/`, не показывать листинг директорий.
+
+### Требования
+
+1) **Статика**
+- Создайте папку `static/` и минимум 2 файла:
+  - `static/app.css`
+  - `static/app.js`
+- Подключите их на главной странице (`/`) (можно просто отдавать HTML строкой или через шаблоны).
+
+2) **Раздача файлов**
+- `GET /static/app.css` отдаёт CSS
+- `GET /static/app.js` отдаёт JS
+- Никакого `directory listing` для `/static/` (если открыть `/static/`, не должно быть списка файлов)
+
+3) **Кэширование (минимум)**
+- Для статики выставьте `Cache-Control` (например, `public, max-age=3600`).
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Swagger: swaggo/swag для генерации документации")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Swagger: swaggo/swag для генерации документации
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Swagger аннотации</Title>
-<Prompt>
-Добавьте аннотации к handlers.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Аннотации: // @Summary, @Description, @Success, @Router")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Аннотации: // @Summary, @Description, @Success, @Router
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Swagger UI</Title>
-<Prompt>
-Подключите Swagger UI.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Swagger UI: /swagger/index.html")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Swagger UI: /swagger/index.html
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="10">
-<Title>Задание 4: Генерация docs</Title>
-<Prompt>
-Сгенерируйте документацию.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Генерация: swag init")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Генерация: swag init
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="15">
-<Title>Задание 5: Request/Response models</Title>
-<Prompt>
-Определите модели для Swagger.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Модели: struct с json тегами")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Модели: struct с json тегами
-</ExpectedOutput>
+<Criteria>
+- `/` возвращает HTML, где подключены `/static/app.css` и `/static/app.js`
+- `curl -I http://localhost:8080/static/app.css` содержит корректный `Content-Type` и `Cache-Control`
+- `GET /static/` не показывает список файлов (либо 404, либо редирект/заглушка)
+</Criteria>
+<Hints>
+- Используйте `http.FileServer` + `http.StripPrefix("/static/", ...)`.
+- Чтобы отключить листинг директорий, можно:
+  - проверить `r.URL.Path` и не отдавать директорию без `index.html`, или
+  - обернуть `http.FileSystem` и запретить `Readdir` (вариант “neutered FS”).
+- Самопроверка:
+  - `curl http://localhost:8080/`
+  - `curl -I http://localhost:8080/static/app.css`
+  - `curl -i http://localhost:8080/static/`
+</Hints>
 </Task>

@@ -156,66 +156,27 @@ logger.Info("something happened",
 - `https://go.dev/blog/slog`
 </Links>
 
-<Task id="1" points="10">
-<Title>Задание 1: Настройте JSON‑логер</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Structured logging (slog) + request_id + trace correlation</Title>
 <Prompt>
-Настройте `log/slog` на вывод JSON в stdout, добавьте поля `service` и `env`. В проекте — сделайте так, чтобы уровень логирования менялся через переменную окружения.
+Сделайте логирование в capstone‑сервисе “по‑взрослому”: структурно, с корреляцией и понятными полями.
+
+### Требования
+
+1) **JSON‑логер**
+- Используйте `log/slog` (JSON handler)
+- Добавьте базовые поля: `service`, `env`, `version` (если есть)\n- Уровень логирования задаётся ENV (например, `LOG_LEVEL=debug|info|warn|error`)
+
+2) **Access log**
+- Для каждого запроса логируйте:\n  - method/path (или rpc method)\n  - status code\n  - duration_ms\n  - request_id\n  - error (если был)\n
+3) **request_id**
+- Если заголовок `X-Request-Id` пришёл — используйте его\n- Иначе сгенерируйте и верните в ответе\n
+4) **Корреляция с трейсами**
+- После подключения OpenTelemetry добавьте в логи `trace_id` и `span_id`\n- Убедитесь, что по `trace_id` можно связать лог и трейс\n
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("slog: JSON handler + service/env + level from env")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-slog: JSON handler + service/env + level from env
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="10">
-<Title>Задание 2: Request ID и access log</Title>
-<Prompt>
-Добавьте middleware, который выставляет `X-Request-Id` и логирует завершение запроса с `method/path/status/duration_ms/request_id`.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("http middleware: request_id + access log")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-http middleware: request_id + access log
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Корреляция логов и трейсов</Title>
-<Prompt>
-После подключения OpenTelemetry добавьте в логи `trace_id/span_id` (минимум в access log). Проверьте, что по trace_id можно найти и лог, и трейс.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("logs+traces: trace_id/span_id в логах")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-logs+traces: trace_id/span_id в логах
-</ExpectedOutput>
+<Criteria>
+- Логи в JSON, читаемые и пригодные для поиска\n- `request_id` стабильно проходит через весь запрос и возвращается клиенту\n- При включённом tracing в логах есть trace_id/span_id\n</Criteria>
+<Hints>
+- Для HTTP удобно хранить request_id/trace в `context.Context`.\n- Для gRPC используйте interceptors.\n- Самопроверка:\n  - сделайте запрос\n  - найдите в логах request_id\n  - (после OTel) найдите trace_id и откройте этот trace в Jaeger/Tempo\n</Hints>
 </Task>
 

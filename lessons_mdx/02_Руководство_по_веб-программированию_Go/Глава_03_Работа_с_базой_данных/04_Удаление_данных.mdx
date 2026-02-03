@@ -506,107 +506,42 @@ if count > 0 {
 ```
 </Pitfalls>
 
-<Task id="1" points="15">
-<Title>Задание 1: gRPC сервер</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Удаление данных (DELETE + подтверждение + идемпотентность)</Title>
 <Prompt>
-Создайте gRPC сервер.
+Добавьте удаление задач в вашем приложении.
+
+### Требования
+
+1) **DB слой**
+- Реализуйте `DeleteTask(id)`:
+  - выполняет `DELETE FROM tasks WHERE id = ?`
+  - если `RowsAffected == 0` → “не найдено”
+
+2) **HTTP API**
+- `DELETE /api/v1/tasks/{id}`
+  - 204 на успешное удаление
+  - 404 если задачи нет
+
+3) **HTML UI**
+- Добавьте кнопку/ссылку “Удалить” рядом с задачей (или на странице задачи)
+- Удаление не должно быть по GET (используйте `<form method="POST">` + отдельный endpoint или JS fetch)
+- Добавьте подтверждение (минимум `confirm()` в браузере или отдельная confirm‑страница)
+
+4) **Идемпотентность**
+- Повторный `DELETE` того же `id` должен возвращать 404 (или 204 — выберите одну стратегию и придерживайтесь её)
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("gRPC: s := grpc.NewServer(); pb.RegisterXXXServer(s, &server{})")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-gRPC: s := grpc.NewServer(); pb.RegisterXXXServer(s, &server{})
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Protobuf</Title>
-<Prompt>
-Определите сервис в proto.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Proto: service Greeter { rpc SayHello(Request) returns (Response); }")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Proto: service Greeter { rpc SayHello(Request) returns (Response); }
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: gRPC клиент</Title>
-<Prompt>
-Создайте gRPC клиента.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Клиент: conn, _ := grpc.Dial(addr, grpc.WithInsecure())")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Клиент: conn, _ := grpc.Dial(addr, grpc.WithInsecure())
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="20">
-<Title>Задание 4: Streaming</Title>
-<Prompt>
-Реализуйте streaming.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Streaming: server streaming, client streaming, bidirectional")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Streaming: server streaming, client streaming, bidirectional
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="20">
-<Title>Задание 5: gRPC interceptors</Title>
-<Prompt>
-Добавьте interceptors.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Interceptors: grpc.UnaryInterceptor(loggingInterceptor)")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Interceptors: grpc.UnaryInterceptor(loggingInterceptor)
-</ExpectedOutput>
+<Criteria>
+- После удаления задача исчезает из списка и не отдаётся по `GET /api/v1/tasks/{id}`
+- В коде есть проверка `RowsAffected`
+- UI не удаляет по GET и просит подтверждение
+</Criteria>
+<Hints>
+- Для HTML формы часто делают путь `POST /tasks/{id}/delete`.
+- Самопроверка:
+  - создать задачу
+  - удалить её через API
+  - убедиться, что повторный delete/GET ведут себя согласно выбранной политике
+</Hints>
 </Task>

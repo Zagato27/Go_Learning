@@ -404,113 +404,54 @@ if err != nil {
 ```
 </Pitfalls>
 
-<Task id="1" points="10">
-<Title>Задание 1: Chi router</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Первое веб‑приложение (скелет сервера)</Title>
 <Prompt>
-Создайте роутер с chi.
+Соберите минимальное веб‑приложение, которое запускается локально и умеет отвечать на несколько маршрутов.
+
+**Где делать:** в отдельной папке/репозитории (например, `web-labs/01-first-app/`).  
+**Стек:** `net/http` + роутер из урока (Chi). Не используйте Gin.
+
+### Требования
+
+1) **Сервер**
+- Поднимается на `:8080` (порт вынесите в конфиг/флаг/ENV)
+- Имеет таймауты `ReadHeaderTimeout`, `ReadTimeout`, `WriteTimeout`, `IdleTimeout`
+- Поддерживает **graceful shutdown** по `SIGINT/SIGTERM` (аккуратно завершает работу)
+
+2) **Маршруты**
+- `GET /healthz` → возвращает `ok`
+- `GET /` → простая страница/текст “Hello from Go”
+- `GET /hello/{name}` → возвращает `hello, {name}`
+
+3) **Middleware**
+- Логирование запросов (метод, путь, код ответа, длительность)
+- Recovery (panic не валит процесс)
+
+4) **README**
+- Как запустить
+- Примеры `curl` запросов
+
 </Prompt>
-<StarterCode>
+<Criteria>
+- Проект собирается и запускается: `go run ./...`
+- `curl http://localhost:8080/healthz` возвращает `ok`
+- `curl http://localhost:8080/hello/petr` возвращает `hello, petr`
+- При `Ctrl+C` сервер корректно завершается без зависаний (shutdown с таймаутом)
+- В логах есть запись на каждый запрос (метод, путь, статус, latency)
+</Criteria>
+<Hints>
+- Начните с:
+
 ```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Chi: r := chi.NewRouter()")
-}
+r := chi.NewRouter()
+srv := &http.Server{Addr: ":8080", Handler: r}
 ```
-</StarterCode>
-<ExpectedOutput>
-Chi: r := chi.NewRouter()
-</ExpectedOutput>
-</Task>
 
-<Task id="2" points="10">
-<Title>Задание 2: Chi параметры URL</Title>
-<Prompt>
-Получите параметры из URL.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Параметры: chi.URLParam(r, \"id\")")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Параметры: chi.URLParam(r, "id")
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Chi Route groups</Title>
-<Prompt>
-Создайте группы маршрутов.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Группы: r.Route(\"/api\", func(r chi.Router) {...})")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Группы: r.Route("/api", func(r chi.Router) {...})
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="10">
-<Title>Задание 4: Chi middleware</Title>
-<Prompt>
-Добавьте middleware.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Middleware: r.Use(middleware.Logger)")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Middleware: r.Use(middleware.Logger)
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="15">
-<Title>Задание 5: Chi context</Title>
-<Prompt>
-Передайте данные через context.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-)
-
-// TODO: Используйте context
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Context: r.WithContext(context.WithValue(...))
-</ExpectedOutput>
+- Для graceful shutdown используйте `signal.NotifyContext(...)` и `srv.Shutdown(ctx)`.
+- Для логов можно использовать `middleware.Logger` (chi) или написать свой middleware.
+- Самопроверка:
+  - `go test ./...`
+  - несколько `curl` запросов (см. критерии)
+</Hints>
 </Task>

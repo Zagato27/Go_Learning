@@ -117,45 +117,29 @@ Gateway умеет маппить ошибки, но вам нужно опре�
 - `https://github.com/googleapis/googleapis` (annotations)
 </Links>
 
-<Task id="1" points="15">
-<Title>Задание 1: Добавьте grpc-gateway (опционально)</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: grpc-gateway + OpenAPI для gRPC capstone</Title>
 <Prompt>
-В capstone gRPC проекте добавьте grpc-gateway для одного-двух методов и поднимите REST endpoint `/api/v1/...`, который проксирует в gRPC.
+Сделайте REST “фасад” для части gRPC API через grpc-gateway и сгенерируйте OpenAPI спецификацию.
+
+### Требования
+
+1) **Gateway**
+- Добавьте grpc-gateway для 1–2 RPC методов\n- REST путь должен быть версионирован (например, `/api/v1/users/...`)\n- Gateway не содержит бизнес‑логики: только проксирование в gRPC
+
+2) **Annotations**
+- Используйте google.api.http annotations в proto\n- Проверьте, что маппинг корректный (path params, query params)
+
+3) **OpenAPI**
+- Сгенерируйте OpenAPI (swagger.json/yaml)\n- Подключите Swagger UI или отдавайте файл + краткая инструкция, как открыть
+
+4) **Ошибки**
+- Определите, как gRPC ошибки маппятся в HTTP статусы (по умолчанию grpc-gateway уже делает маппинг, но важно проверить)\n- Документируйте формат ошибок для REST клиентов
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("grpc-gateway: REST -> gRPC proxy")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-grpc-gateway: REST -> gRPC proxy
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="10">
-<Title>Задание 2: Сгенерируйте OpenAPI</Title>
-<Prompt>
-Сгенерируйте OpenAPI из proto и подключите Swagger UI (или отдайте файл), чтобы можно было посмотреть документацию и протестировать REST.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("OpenAPI generated from proto")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-OpenAPI generated from proto
-</ExpectedOutput>
+<Criteria>
+- REST эндпоинт реально работает и проксирует в gRPC\n- OpenAPI генерируется воспроизводимо одной командой\n- В README есть “как проверить” (curl + ссылка на swagger)\n</Criteria>
+<Hints>
+- Удобно иметь `make generate` для proto/gateway/openapi.\n- Следите за версионированием и тем, чтобы не было дубля контрактов.\n</Hints>
 </Task>
 

@@ -219,6 +219,7 @@ func (m *MDXImporter) importLesson(ctx context.Context, moduleID int64, lessonFi
 			TestsGo:          task.Tests,
 			ExpectedOutput:   task.ExpectedOutput,
 			RequiredPatterns: task.RequiredPatterns,
+			Mode:             task.Mode,
 			Points:           task.Points,
 			OrderIndex:       i,
 		}
@@ -308,6 +309,7 @@ type MDXTask struct {
 	Tests            string
 	ExpectedOutput   string
 	RequiredPatterns string
+	Mode             string
 	Points           int
 }
 
@@ -328,7 +330,8 @@ func (m *MDXImporter) parseMDXTasks(mdx string) []MDXTask {
 		body := match[2]
 
 		task := MDXTask{
-			Points: 10, // default
+			Points: 10,     // default
+			Mode:   "auto", // default
 		}
 
 		// Парсим атрибуты: id="1" points="15"
@@ -339,6 +342,11 @@ func (m *MDXImporter) parseMDXTasks(mdx string) []MDXTask {
 				switch am[1] {
 				case "points":
 					task.Points, _ = strconv.Atoi(am[2])
+				case "mode":
+					mode := strings.TrimSpace(am[2])
+					if mode == "manual" || mode == "auto" {
+						task.Mode = mode
+					}
 				}
 			}
 		}
@@ -358,7 +366,7 @@ func (m *MDXImporter) parseMDXTasks(mdx string) []MDXTask {
 		}
 
 		// Если StarterCode пустой, генерируем базовый
-		if task.StarterCode == "" {
+		if task.Mode != "manual" && task.StarterCode == "" {
 			task.StarterCode = `package main
 
 import "fmt"

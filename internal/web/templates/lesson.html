@@ -79,7 +79,7 @@
                     <h2>📝 Практика</h2>
                     
                     {{range .Lesson.Tasks}}
-                    <div class="task-card" data-task-id="{{.ID}}" {{if index $.CompletedTasks .ID}}data-completed="true"{{end}}>
+                    <div class="task-card" data-task-id="{{.ID}}" data-task-mode="{{.Mode}}" {{if index $.CompletedTasks .ID}}data-completed="true"{{end}}>
                         <div class="task-header">
                             <h3>{{.Title}}</h3>
                             {{if index $.CompletedTasks .ID}}
@@ -88,6 +88,12 @@
                             <span class="task-points">{{.Points}} очков</span>
                             {{end}}
                         </div>
+
+                        {{if eq .Mode "manual"}}
+                        <div class="task-manual-note">
+                            Это ручное задание — выполняйте в IDE по ТЗ ниже.
+                        </div>
+                        {{end}}
                         
                         <div class="task-prompt markdown">
                             {{.PromptMD | markdown}}
@@ -107,12 +113,14 @@
                         </details>
                         {{end}}
                         
+                        {{if ne .Mode "manual"}}
                         <div class="code-editor">
                             <h4>📝 Начальный код:</h4>
                             <textarea class="code-input" placeholder="Введите ваш код здесь...">{{.StarterCode}}</textarea>
                         </div>
+                        {{end}}
                         
-                        {{if .ExpectedOutput}}
+                        {{if and (ne .Mode "manual") .ExpectedOutput}}
                         <details class="task-expected">
                             <summary>🎯 Ожидаемый вывод</summary>
                             <pre class="expected-output">{{.ExpectedOutput}}</pre>
@@ -120,8 +128,16 @@
                         {{end}}
                         
                         <div class="task-actions">
+                            {{if eq .Mode "manual"}}
+                                {{if index $.CompletedTasks .ID}}
+                                <button class="btn btn-primary complete-btn" disabled>✅ Выполнено</button>
+                                {{else}}
+                                <button class="btn btn-primary complete-btn">✅ Отметить выполненным</button>
+                                {{end}}
+                            {{else}}
                             <button class="btn btn-secondary run-btn">▶ Запустить</button>
                             <button class="btn btn-primary check-btn">✓ Проверить</button>
+                            {{end}}
                         </div>
                         
                         <div class="task-output" style="display: none;">

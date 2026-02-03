@@ -116,66 +116,29 @@ export default function () {
 - `https://go.dev/blog/pprof`
 </Links>
 
-<Task id="1" points="10">
-<Title>Задание 1: Сформулируйте SLO для REST сервиса</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Нагрузка + SLO + профили под нагрузкой (capstone)</Title>
 <Prompt>
-Выберите 2–3 метрики (например, p99 latency, % ошибок, RPS) и запишите конкретные численные цели для вашего capstone REST проекта.
+Проведите нагрузочный прогон capstone‑сервиса и оформите результаты как мини‑отчёт.
+
+### Требования
+
+1) **SLO**
+- Зафиксируйте 2–3 численные цели (пример):\n  - p95 < 200ms\n  - error rate < 0.1%\n  - RPS >= 200\n- Опишите их в README (почему такие числа и на каком окружении)
+
+2) **Нагрузочный прогон**
+- Выберите инструмент: `k6` / `hey` / `wrk`
+- Зафиксируйте параметры (конкурентность, длительность, target endpoint)
+
+3) **Профили под нагрузкой**
+- Во время нагрузки снимите:\n  - CPU profile\n  - heap/allocs profile\n  - (опционально) trace\n
+4) **Одна оптимизация**
+- Выберите одну “горячую” точку и сделайте оптимизацию\n- Повторите прогон и покажите “до/после” (latency/RPS/CPU/allocs)
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("SLO: p99<..., errors<..., RPS>=...")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-SLO: p99<..., errors<..., RPS>=...
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="10">
-<Title>Задание 2: Нагрузочный прогон + CPU профиль</Title>
-<Prompt>
-Сделайте прогон `hey/wrk/k6` и снимите CPU профиль на 30 секунд. В отчёте выпишите топ‑3 функций из `pprof top`.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("pprof top: 1) ... 2) ... 3) ...")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-pprof top: 1) ... 2) ... 3) ...
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Оптимизация одной точки</Title>
-<Prompt>
-Выберите одну “горячую” функцию/участок и оптимизируйте. Повторите прогон и покажите “до/после” по p95/p99 и/или CPU.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("до/после: что изменил и какой эффект")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-до/после: что изменил и какой эффект
-</ExpectedOutput>
+<Criteria>
+- Есть воспроизводимые команды нагрузки (например, `make load`)\n- Есть артефакты профилей или команды их получения\n- Есть отчёт с до/после и выводами\n</Criteria>
+<Hints>
+- Не меняйте одновременно несколько вещей — иначе сложно понять, что дало эффект.\n- Старайтесь прогонять тест в одинаковых условиях (один и тот же docker-compose, те же данные).\n</Hints>
 </Task>
 

@@ -527,107 +527,49 @@ router.HandleFunc("/users/{id}", specificHandler)
 ```
 </Pitfalls>
 
-<Task id="1" points="10">
-<Title>Задание 1: Структура проекта</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Gorilla/mux (альтернативный роутер для того же API)</Title>
 <Prompt>
-Организация Go проекта.
+Сделайте **альтернативную реализацию роутера** на `github.com/gorilla/mux` для вашего мини‑приложения.
+
+Идея лабы: научиться на практике — как задаются маршруты, методы, параметры и префиксы в mux.
+
+### Требования
+
+1) **Отдельный entrypoint**
+- Добавьте второй бинарник (например, `cmd/webapp-mux/main.go`) или отдельную папку проекта.
+- Он должен поднимать те же ключевые маршруты, что и версия на Chi:
+  - `GET /healthz`
+  - `GET /api/v1/tasks`
+  - `GET /api/v1/tasks/{id}`
+  - `POST /api/v1/tasks`
+
+2) **Mux‑специфика**
+- Используйте `mux.Vars(r)` для path‑параметров
+- Для одного из маршрутов используйте **regex** в пути (например, `{id:[0-9]+}`)
+- Покажите, как в mux делаются подроутеры/префиксы (`PathPrefix` или `Subrouter`)
+
+3) **Единый формат ошибок**
+- 400/404/500 — в JSON
+
 </Prompt>
-<StarterCode>
+<Criteria>
+- Оба варианта (Chi и mux) запускаются отдельно и дают одинаковое поведение API
+- Параметр `{id}` корректно парсится и валидируется (нечисловой id → 400 или 404 по вашей схеме)
+- Есть префикс `/api/v1` и маршруты не “перехватывают” друг друга
+</Criteria>
+<Hints>
+- Старт:
+
 ```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Структура: cmd/, internal/, pkg/, api/")
-}
+r := mux.NewRouter()
+api := r.PathPrefix("/api/v1").Subrouter()
 ```
-</StarterCode>
-<ExpectedOutput>
-Структура: cmd/, internal/, pkg/, api/
-</ExpectedOutput>
-</Task>
 
-<Task id="2" points="15">
-<Title>Задание 2: Clean Architecture</Title>
-<Prompt>
-Слои Clean Architecture.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Слои: handlers -> services -> repositories")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Слои: handlers -> services -> repositories
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Dependency Injection</Title>
-<Prompt>
-Внедрение зависимостей.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("DI: NewService(repo Repository) *Service")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-DI: NewService(repo Repository) *Service
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="10">
-<Title>Задание 4: Конфигурация</Title>
-<Prompt>
-Загрузка конфигурации.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Конфиг: envconfig, viper, или yaml")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Конфиг: envconfig, viper, или yaml
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="20">
-<Title>Задание 5: Graceful shutdown</Title>
-<Prompt>
-Корректное завершение.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Shutdown: signal.Notify, context.WithCancel")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Shutdown: signal.Notify, context.WithCancel
-</ExpectedOutput>
+- Для методов используйте `.Methods("GET")`.
+- Самопроверка:
+  - `curl -s http://localhost:8080/healthz`
+  - `curl -s http://localhost:8080/api/v1/tasks`
+  - `curl -s -X POST http://localhost:8080/api/v1/tasks -H \"Content-Type: application/json\" -d '{\"title\":\"mux\"}'`
+</Hints>
 </Task>

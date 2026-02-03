@@ -765,110 +765,48 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 ```
 </Pitfalls>
 
-<Task id="1" points="15">
-<Title>Задание 1: Domain Entity</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Скелет сервиса по Clean Architecture (под capstone)</Title>
 <Prompt>
-Создайте доменную сущность с валидацией.
+Подготовьте каркас для capstone‑проекта по принципам Clean Architecture.
+
+**Что делаем:** создаём структуру пакетов, доменные сущности, use case слой и адаптеры.  
+**Где смотреть требования capstone:** `/projects` или `lessons_mdx/Проекты/capstone-rest.md` и `lessons_mdx/Проекты/capstone-grpc.md`.
+
+### Требования
+
+1) **Структура проекта**
+- `cmd/` — точки входа (HTTP/gRPC)
+- `internal/domain/` — сущности и доменные типы
+- `internal/usecase/` — бизнес‑логика (интерфейсы репозиториев + сервисы)
+- `internal/repo/` — реализации репозиториев (in-memory и/или DB)
+- `internal/transport/http/` или `internal/transport/grpc/` — handlers
+
+2) **Домен**
+- Выберите минимальный домен (например, Orders или Users):
+  - сущность (Entity) + базовая валидация инвариантов
+  - 1–2 сценария usecase (например, Create + Get)
+
+3) **Dependency Rule**
+- `domain` не импортирует ничего “вовне”
+- `usecase` зависит только от `domain` и интерфейсов
+- `repo/transport` зависят от `usecase`/`domain`, а не наоборот
+
+4) **Dependency Injection**
+- В `cmd/.../main.go` соберите зависимости (repo → usecase → transport → server)
+
+5) **Тесты**
+- Минимум 1 unit‑тест на usecase (in-memory репозиторий или мок‑интерфейс)
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Repository Interface и Implementation</Title>
-<Prompt>
-Создайте интерфейс репозитория и in-memory реализацию.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Определите и реализуйте интерфейс
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Use Case</Title>
-<Prompt>
-Реализуйте use case для создания заказа.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="4" points="15">
-<Title>Задание 4: HTTP Handler</Title>
-<Prompt>
-Создайте HTTP handler для API.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import (
-    "fmt"
-    "net/http"
-)
-
-// TODO: Реализуйте HTTP обработчик
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="5" points="10">
-<Title>Задание 5: Dependency Injection</Title>
-<Prompt>
-Соберите все компоненты вместе.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
+<Criteria>
+- Проект собирается: `go test ./...` проходит
+- Слои разделены, нет обратных импортов
+- Usecase тестируется без поднятия HTTP/gRPC сервера и без реальной БД
+- Есть README с описанием структуры и сценариев
+</Criteria>
+<Hints>
+- Начните с интерфейса репозитория в `usecase` и реализации in-memory для тестов.
+- На этом шаге не нужен полный функционал capstone — цель каркас и дисциплина слоёв.
+</Hints>
 </Task>

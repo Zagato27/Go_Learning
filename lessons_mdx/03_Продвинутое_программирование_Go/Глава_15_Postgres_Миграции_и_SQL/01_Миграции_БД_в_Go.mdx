@@ -118,45 +118,28 @@ services:
 - `https://www.postgresql.org/docs/current/sql-altertable.html`
 </Links>
 
-<Task id="1" points="10">
-<Title>Задание 1: Добавьте инструмент миграций в capstone REST</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Миграции для capstone (локально + CI)</Title>
 <Prompt>
-Выберите `goose` или `migrate`, добавьте в репозиторий структуру `migrations/`, опишите команды `make migrate-up/migrate-down` (или аналог).
+Добавьте полноценные миграции БД в capstone‑репозиторий и включите их проверку в CI.
+
+### Требования
+
+1) **Инструмент миграций**
+- Выберите `goose` или `migrate`\n- Добавьте папку `migrations/`\n- Команды для разработчика:\n  - `migrate up`\n  - `migrate down`\n  - `migrate status` (опционально)\n- Опишите всё в README/Makefile
+
+2) **Схема**
+- Перенесите создание таблиц из “AutoMigrate”/ручного SQL в миграции\n- Миграции должны быть применимы на чистую БД
+
+3) **Docker Compose**
+- Добавьте сервис/джобу для применения миграций (опционально), либо явную команду `make migrate-up` для compose окружения
+
+4) **CI**
+- В GitHub Actions:\n  - поднять Postgres service container\n  - применить миграции на чистую БД\n  - запустить интеграционные тесты\n
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("migrations: tool выбран + команды up/down")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-migrations: tool выбран + команды up/down
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: CI проверяет миграции</Title>
-<Prompt>
-Добавьте шаг в CI: поднять Postgres (service container), применить миграции на чистую БД, запустить интеграционные тесты.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("CI: postgres + migrate up + integration tests")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-CI: postgres + migrate up + integration tests
-</ExpectedOutput>
+<Criteria>
+- Новый разработчик может поднять проект одной инструкцией (compose + migrate + run)\n- CI падает, если миграции не применяются\n- Миграции не зависят от ручных действий/порядка\n</Criteria>
+<Hints>
+- Подумайте о конкурентном запуске миграций (локально ок, в проде обычно выделяют отдельный job).\n- Делайте миграции обратимыми, где это разумно.\n</Hints>
 </Task>
 

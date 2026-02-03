@@ -189,66 +189,39 @@ func main() {
 - `https://github.com/google/pprof/blob/main/doc/README.md`
 </Links>
 
-<Task id="1" points="10">
-<Title>Задание 1: Подключите pprof (debug порт)</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: pprof в capstone (CPU/heap) + одна оптимизация с отчётом</Title>
 <Prompt>
-Опишите (и затем реализуйте в своём проекте), как вы поднимете отдельный debug-сервер с `/debug/pprof/` на отдельном порту и почему это безопаснее, чем вешать pprof на основной HTTP-порт.
+Подключите pprof к вашему capstone‑сервису и проведите мини‑исследование производительности.
+
+### Требования
+
+1) **Debug server**
+- Поднимите pprof на отдельном debug‑порту (например, `127.0.0.1:6060`)
+- Объясните в README, почему не стоит вешать pprof на публичный порт без защиты
+
+2) **CPU профиль**
+- Под нагрузкой снимите CPU профиль на 30 секунд:
+  - `curl http://127.0.0.1:6060/debug/pprof/profile?seconds=30 -o cpu.pprof`
+- Найдите топ‑3 “горячих” функции (`go tool pprof`)
+
+3) **Heap/allocs**
+- Снимите heap профиль/allocs профиль для одного горячего endpoint
+
+4) **Одна оптимизация**
+- Выберите одну конкретную оптимизацию (уменьшить latency/CPU/allocs) и сделайте “до/после”:
+  - что было
+  - что поменяли
+  - почему это сработало
+  - как измеряли
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("pprof: отдельный debug порт и ограничение доступа")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-pprof: отдельный debug порт и ограничение доступа
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="10">
-<Title>Задание 2: Снимите CPU профиль под нагрузкой</Title>
-<Prompt>
-Сформулируйте план: как вы запустите сервис, дадите нагрузку (hey/wrk/k6), снимете CPU-профиль на 30 секунд и найдёте топ-3 “горячих” функции.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("plan: load -> curl /debug/pprof/profile -> go tool pprof")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-plan: load -> curl /debug/pprof/profile -> go tool pprof
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Найдите лишние аллокации</Title>
-<Prompt>
-Выберите один “горячий” endpoint вашего проекта и уменьшите аллокации (по heap/allocs профилю). В отчёте укажите: было/стало, что изменили и почему это работает.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("allocs: было -> стало, что поменял и почему")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-allocs: было -> стало, что поменял и почему
-</ExpectedOutput>
+<Criteria>
+- pprof доступен на отдельном порту и не торчит наружу
+- В репозитории есть артефакты/отчёт (хотя бы `perf/README.md` или секция в основном README)
+- Есть сравнение до/после по одной метрике (CPU/allocs/latency)
+</Criteria>
+<Hints>
+- Для нагрузки используйте `hey`/`wrk`/`k6` — выберите один инструмент и зафиксируйте параметры.\n- В `pprof` полезные команды: `top`, `top -cum`, `list <func>`, `web`.\n</Hints>
 </Task>
 

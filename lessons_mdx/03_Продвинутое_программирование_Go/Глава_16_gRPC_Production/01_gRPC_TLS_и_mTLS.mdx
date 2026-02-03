@@ -124,45 +124,29 @@ conn, _ := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials
 - `https://grpc.io/docs/guides/auth/`
 </Links>
 
-<Task id="1" points="15">
-<Title>Задание 1: Включите TLS в capstone gRPC</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: gRPC TLS/mTLS в capstone (серты, конфиг, проверка)</Title>
 <Prompt>
-Добавьте TLS на gRPC сервер и клиент. Проверьте, что вызовы работают и не используется insecure в staging/CI.
+Сделайте безопасность для gRPC capstone: сначала TLS, затем mTLS для межсервисных вызовов.
+
+### Требования
+
+1) **TLS**
+- Сервер использует TLS сертификат\n- Клиент подключается по TLS\n- Никаких `grpc.WithInsecure()` в CI/staging ветках (проверьте, что конфиг не допускает “случайно”)
+
+2) **mTLS**
+- Сервер требует клиентский сертификат (`ClientAuth: RequireAndVerifyClientCert`)\n- Проверка клиента идёт по вашему CA\n- Клиент использует `client.crt/client.key`
+
+3) **Генерация сертификатов**
+- В репозитории есть воспроизводимый способ генерации dev сертификатов:\n  - `make certs` или скрипт\n- Серты не коммитим в публичный репо, но dev‑серты можно хранить локально/в gitignored директории (опишите в README)
+
+4) **Проверка**
+- Пример команд `grpcurl` (или вашего клиента), которые:\n  - успешно вызывают метод при корректных сертификатах\n  - падают при неверных/отсутствующих сертификатах
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("grpc: TLS enabled")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-grpc: TLS enabled
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Добавьте mTLS</Title>
-<Prompt>
-Настройте mTLS: сервер требует клиентский сертификат и проверяет его по CA. На клиенте используйте `client.crt/client.key`.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("grpc: mTLS enabled")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-grpc: mTLS enabled
-</ExpectedOutput>
+<Criteria>
+- TLS и mTLS реально работают (есть доказательство: команды/лог)\n- Конфигурация не позволяет “тихо” переключиться на insecure\n- В README есть секция “Security: TLS/mTLS” с инструкциями\n</Criteria>
+<Hints>
+- Удобно начать с self‑signed CA и подписывать server/client cert.\n- Для gRPC используйте `credentials.NewTLS(tlsConfig)`.\n</Hints>
 </Task>
 

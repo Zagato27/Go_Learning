@@ -119,66 +119,27 @@ _ = rdb.Set(ctx, key, b, ttl).Err()
 - `https://github.com/redis/go-redis`
 </Links>
 
-<Task id="1" points="10">
-<Title>Задание 1: Выберите, что кэшировать</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Redis кэширование в capstone (cache-aside + TTL + stampede)</Title>
 <Prompt>
-Для capstone REST проекта выберите 2 endpoint’а/операции, которые логично ускорять кэшем. Для каждого — ключ, TTL, стратегия инвалидации.
+Добавьте Redis как слой ускорения для capstone‑сервиса (обычно REST), не превращая кэш в источник истины.
+
+### Требования
+
+1) **Что кэшируем**
+- Выберите 2 операции/эндпоинта (например: `GET /products/{id}`, `GET /products` с фильтром)\n- Для каждого:\n  - ключ\n  - TTL\n  - инвалидация (когда сбрасывать)\n
+2) **Cache‑aside**
+- Реализуйте паттерн:\n  - сначала Redis\n  - затем БД\n  - затем best-effort запись в Redis\n- Сериализация: JSON/MsgPack — выберите и опишите\n
+3) **Деградация**
+- Если Redis недоступен, сервис должен работать (медленнее, но без падения)\n
+4) **Защита от stampede**
+- Добавьте jitter к TTL и/или `singleflight`, чтобы один запрос прогревал кэш\n
+5) **Инвалидация**
+- При изменении данных (например, `POST/PUT/DELETE /products`) кэш должен сбрасываться (delete keys или versioning)\n
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("cache plan: endpoints, keys, TTL, invalidation")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-cache plan: endpoints, keys, TTL, invalidation
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Реализуйте cache-aside</Title>
-<Prompt>
-Реализуйте cache-aside для чтения одной сущности (например, `GET /users/{id}`): сначала Redis, затем БД, затем запись в Redis best-effort.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("cache-aside implemented (redis -> db -> redis)")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-cache-aside implemented (redis -> db -> redis)
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="10">
-<Title>Задание 3: Защита от stampede</Title>
-<Prompt>
-Добавьте простую защиту от stampede: jitter на TTL и/или singleflight (один запрос прогревает кэш).
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("anti-stampede: jitter and/or singleflight")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-anti-stampede: jitter and/or singleflight
-</ExpectedOutput>
+<Criteria>
+- Кэш реально работает (видно по логам/метрикам: hit/miss)\n- Redis outage не ломает сервис\n- Есть базовая защита от stampede\n- Инвалидация не оставляет данные “навсегда протухшими”\n</Criteria>
+<Hints>
+- Не кладите в ключи high‑cardinality поля без необходимости.\n- Для наблюдаемости полезно завести метрики `cache_hits_total`/`cache_misses_total`.\n</Hints>
 </Task>
 

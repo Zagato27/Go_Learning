@@ -130,45 +130,35 @@ go tool trace trace.out
 - `https://go.dev/blog/execution-traces-2016`
 </Links>
 
-<Task id="1" points="10">
-<Title>Задание 1: Когда выбрать trace вместо pprof?</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: go tool trace для capstone (временная картина блокировок/GC)</Title>
 <Prompt>
-Приведите 3 примера проблем, которые лучше диагностируются через `go tool trace`, чем через `pprof`.
+Снимите execution trace для вашего capstone‑сервиса и используйте его, чтобы найти хотя бы один источник ожидания/блокировок.
+
+### Требования
+
+1) **Снятие trace**
+Выберите один способ:
+- `go test -trace trace.out ./...` (если есть тест/бенчмарк), или
+- `runtime/trace` в коде (в тесте/спец. режиме), или
+- (если используете net/http/pprof) `curl http://127.0.0.1:6060/debug/pprof/trace?seconds=10 -o trace.out`
+
+2) **Анализ**
+- Откройте `go tool trace trace.out`
+- Найдите минимум один интересный участок:
+  - блокировки на mutex/каналах
+  - GC паузы / частые GC
+  - задержки в scheduler (goroutine runnable, но не исполняется)
+
+3) **Результат**
+- Коротко опишите, что увидели (скриншот/текст) и какую гипотезу это подтверждает
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("trace: contention, scheduler/GC, блокировки/latency во времени")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-trace: contention, scheduler/GC, блокировки/latency во времени
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="10">
-<Title>Задание 2: Снимите trace в тесте/бенчмарке</Title>
-<Prompt>
-Снимите `trace.out` для вашего пакета (через `go test -trace` или `runtime/trace`) и найдите хотя бы один участок с блокировкой/ожиданием. Коротко опишите, что вы увидели.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("trace.out: где блокировки/ожидание и почему")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-trace.out: где блокировки/ожидание и почему
-</ExpectedOutput>
+<Criteria>
+- В репозитории есть `trace.out` (или команда, как его получить воспроизводимо)
+- Есть короткий отчёт “что увидел/почему это важно”
+</Criteria>
+<Hints>
+- Trace хорош, когда важно “как во времени” происходят события: конкуренция, scheduler, GC.\n- Снимайте trace при похожей нагрузке/условиях, иначе сравнение бессмысленно.\n</Hints>
 </Task>
 

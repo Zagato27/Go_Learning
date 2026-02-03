@@ -105,66 +105,29 @@ client.Do(req.WithContext(r.Context()))
 - `https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc`
 </Links>
 
-<Task id="1" points="15">
-<Title>Задание 1: Инструментируйте Gin</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Инструментация Gin + gRPC (otelgin/otelgrpc) + propagation</Title>
 <Prompt>
-В capstone REST проекте добавьте `otelgin` middleware, проверьте, что на каждый HTTP запрос создаётся span и он виден в Jaeger/Tempo.
+Добавьте авто‑инструментацию входящих запросов и обеспечьте сквозной trace между компонентами.
+
+### Требования
+
+1) **HTTP (Gin)**
+- Подключите `otelgin` middleware\n- Убедитесь, что на каждый HTTP запрос создаётся span
+
+2) **gRPC**
+- Подключите `otelgrpc` interceptors на сервере и клиенте\n- Убедитесь, что у вызова есть client span и server span
+
+3) **Propagation**
+- Настройте propagator (`TraceContext` + `Baggage`)\n- Проверьте, что trace “склеивается” при вызове из одного сервиса в другой (или из gateway в gRPC)
+
+4) **Корреляция логов**
+- Добавьте `trace_id/span_id` в access log и в error logs
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("otelgin: middleware подключён")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-otelgin: middleware подключён
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Инструментируйте gRPC</Title>
-<Prompt>
-В capstone gRPC проекте добавьте `otelgrpc` interceptors на сервере и клиенте. Проверьте, что у вызова есть server span и client span.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("otelgrpc: interceptors подключены")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-otelgrpc: interceptors подключены
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="10">
-<Title>Задание 3: Trace ID в логах</Title>
-<Prompt>
-Добавьте `trace_id`/`span_id` в access log и в логи ошибок. Убедитесь, что по trace_id можно найти все связанные записи.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("logs: trace_id/span_id добавлены")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-logs: trace_id/span_id добавлены
-</ExpectedOutput>
+<Criteria>
+- В Jaeger/Tempo видно дерево span’ов для запроса, которое проходит через HTTP → gRPC (или HTTP → DB)\n- trace_id одинаковый на связанных span’ах\n- По trace_id можно найти лог‑записи этого запроса\n</Criteria>
+<Hints>
+- Для Gin: `otelgin.Middleware(\"service-name\")`.\n- Для gRPC: `otelgrpc.UnaryServerInterceptor(...)` и `otelgrpc.UnaryClientInterceptor(...)`.\n- Важно: не инициализируйте telemetry дважды и не забудьте propagator.\n</Hints>
 </Task>
 

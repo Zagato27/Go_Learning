@@ -531,107 +531,37 @@ volumes:
 ```
 </Examples>
 
-<Task id="1" points="10">
-<Title>Задание 1: Базовые метрики</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Метрики Prometheus для capstone (HTTP/gRPC)</Title>
 <Prompt>
-Добавьте Counter и Gauge метрики.
+Добавьте метрики Prometheus в capstone‑проект (REST или gRPC) и убедитесь, что они действительно полезны.
+
+### Требования
+
+1) **Экспорт метрик**
+- Эндпоинт `/metrics` (promhttp) доступен локально
+- Prometheus из docker-compose умеет скрейпить сервис
+
+2) **Технические метрики**
+- `requests_total` (Counter) с labels минимум: `method`, `path` (или `rpc_method`), `status`
+- `request_duration_seconds` (Histogram) с теми же labels (без взрывного cardinality)
+- `errors_total` (Counter) по классам ошибок (или по статусам)
+
+3) **Бизнес‑метрики**
+- Минимум 1 бизнес‑счётчик (например, `orders_created_total` или `users_created_total`)
+
+4) **Графики**
+- (минимум) опишите в README 3 полезных запроса PromQL:
+  - RPS
+  - p95 latency
+  - error rate
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Histogram для latency</Title>
-<Prompt>
-Измеряйте время ответа с помощью Histogram.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="3" points="10">
-<Title>Задание 3: Бизнес-метрики</Title>
-<Prompt>
-Добавьте метрики для бизнес-операций.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="4" points="10">
-<Title>Задание 4: Middleware для Gin</Title>
-<Prompt>
-Создайте Prometheus middleware для Gin.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="5" points="15">
-<Title>Задание 5: Custom Collector</Title>
-<Prompt>
-Создайте custom collector для системных метрик.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
+<Criteria>
+- `/metrics` отдаёт метрики, и в них видно активность после запросов
+- Histogram реально пишет наблюдения, и по нему можно построить p95
+- Labels не создают взрыв cardinality (нет user_id в labels и т.п.)
+</Criteria>
+<Hints>
+- Для Gin можно повесить middleware, который измеряет latency и пишет статус.\n- Для gRPC удобнее unary interceptor.\n- Самопроверка:\n  - сделать несколько запросов\n  - открыть `/metrics` и найти свои метрики\n  - убедиться, что счётчики растут\n</Hints>
 </Task>

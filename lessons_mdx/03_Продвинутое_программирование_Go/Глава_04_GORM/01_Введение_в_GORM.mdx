@@ -638,107 +638,53 @@ if err := db.First(&user, 1).Error; err != nil {
 ```
 </Pitfalls>
 
-<Task id="1" points="15">
-<Title>Задание 1: Модели со связями</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: GORM + Postgres для REST capstone (модели, связи, транзакции)</Title>
 <Prompt>
-Создайте модели для блога с отношениями.
+Подключите Postgres и GORM в REST capstone и реализуйте базовый слой хранения данных.
+
+Ориентир: `lessons_mdx/Проекты/capstone-rest.md`.
+
+### Требования
+
+1) **Подключение**
+- Поднимите Postgres локально (docker-compose)
+- Подключите GORM (postgres driver), вынесите DSN в ENV
+
+2) **Модели и связи**
+- Опишите модели (минимум):
+  - `User`
+  - `Product`
+  - `Order`
+  - `OrderItem`
+- Настройте связи (has many / belongs to) так, чтобы можно было `Preload` заказа с позициями
+
+3) **CRUD**
+- Реализуйте репозиторий для `Product` (Create/Update/Delete/List/Get)
+- Для `List` добавьте фильтр по имени (например, `LIKE`) и пагинацию
+
+4) **Транзакция**
+- Реализуйте создание заказа в транзакции:
+  - создать `Order`
+  - создать `OrderItem` записи
+  - (опционально) списать остатки/проверить stock
+
+5) **Ошибки**
+- `record not found` переводите в доменную ошибку (или 404 на уровне transport)
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: CRUD операции</Title>
-<Prompt>
-Реализуйте Repository с CRUD операциями.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Scopes и фильтрация</Title>
-<Prompt>
-Создайте переиспользуемые scopes.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="4" points="10">
-<Title>Задание 4: Транзакции</Title>
-<Prompt>
-Реализуйте сложную операцию в транзакции.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="5" points="10">
-<Title>Задание 5: Soft Delete и восстановление</Title>
-<Prompt>
-Реализуйте soft delete с возможностью восстановления.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
+<Criteria>
+- Postgres поднимается и сервис к нему подключается
+- В БД создаются таблицы/схема (в dev можно `AutoMigrate`, но отметьте в README, что в проде нужны миграции)
+- `GET /products` и `POST /products` реально работают с БД
+- Создание заказа атомарно (при ошибке нет частично созданных данных)
+</Criteria>
+<Hints>
+- Для транзакции используйте `db.Transaction(func(tx *gorm.DB) error { ... })`.
+- Для `Preload`: `db.Preload(\"Items\").First(&order, id)`.
+- Самопроверка:
+  - `docker compose up -d postgres`
+  - прогон CRUD через curl/Postman
+  - проверка в psql: записи действительно появились
+</Hints>
 </Task>

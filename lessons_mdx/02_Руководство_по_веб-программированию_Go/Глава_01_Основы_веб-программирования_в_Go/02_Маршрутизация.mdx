@@ -403,107 +403,53 @@ http.HandleFunc("/about", about)
 ```
 </Pitfalls>
 
-<Task id="1" points="10">
-<Title>Задание 1: Fiber framework</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Маршрутизация (REST + параметры + группы)</Title>
 <Prompt>
-Используйте Fiber.
-</Prompt>
-<StarterCode>
-```go
-package main
+Продолжите мини‑приложение из предыдущей лабы и добавьте нормальную маршрутизацию для небольшого REST API.
 
-import "fmt"
+**Где делать:** в том же проекте (например, `web-labs/01-first-app/`).  
+**Стек:** `net/http` + Chi.
 
-func main() {
-    fmt.Println("Fiber: app := fiber.New(); app.Get(\"/\", handler)")
-}
+### Требования
+
+1) **Группы и версия API**
+- Сделайте группу `/api/v1`
+
+2) **Ресурс Tasks**
+Реализуйте эндпоинты:
+- `GET /api/v1/tasks?limit=&offset=&q=` — список задач (пока можно хранить в памяти)
+- `GET /api/v1/tasks/{id}` — одна задача
+- `POST /api/v1/tasks` — создание задачи (JSON)
+
+Формат ответа (пример):
+
+```json
+{ "id": 1, "title": "buy milk", "done": false }
 ```
-</StarterCode>
-<ExpectedOutput>
-Fiber: app := fiber.New(); app.Get("/", handler)
-</ExpectedOutput>
-</Task>
 
-<Task id="2" points="10">
-<Title>Задание 2: Fiber Context</Title>
-<Prompt>
-Работа с fiber.Ctx.
+3) **Коды ошибок**
+- 400 на некорректный JSON/параметры
+- 404 если `id` не найден
+- 201 на успешное создание
+
+4) **NotFound**
+- Настройте общий `NotFound` handler (чтобы для неизвестных путей был понятный ответ).
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Fiber Ctx: c.JSON(data), c.SendString(\"text\")")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Fiber Ctx: c.JSON(data), c.SendString("text")
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="10">
-<Title>Задание 3: Fiber параметры</Title>
-<Prompt>
-Получите параметры.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Параметры: c.Params(\"id\"), c.Query(\"name\")")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Параметры: c.Params("id"), c.Query("name")
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="15">
-<Title>Задание 4: Fiber BodyParser</Title>
-<Prompt>
-Парсинг тела запроса.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Парсинг: c.BodyParser(&data)")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Парсинг: c.BodyParser(&data)
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="10">
-<Title>Задание 5: Fiber производительность</Title>
-<Prompt>
-Особенности производительности Fiber.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Fiber: построен на fasthttp, высокая производительность")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Fiber: построен на fasthttp, высокая производительность
-</ExpectedOutput>
+<Criteria>
+- `GET /api/v1/tasks` возвращает JSON массив
+- `POST /api/v1/tasks` принимает JSON и возвращает созданную сущность (201)
+- `GET /api/v1/tasks/{id}` возвращает 200/404
+- Валидация query параметров: `limit/offset` не отрицательные, есть разумные default
+- Ошибки возвращаются единообразно (JSON с полями `error`/`message` или подобным)
+</Criteria>
+<Hints>
+- Для `id` используйте `chi.URLParam(r, "id")` + `strconv.Atoi`.
+- Для JSON: `json.NewDecoder(r.Body).Decode(&dto)` и не забыть `DisallowUnknownFields()` (опционально).
+- Самопроверка (пример):
+  - `curl -s http://localhost:8080/api/v1/tasks`
+  - `curl -s -X POST http://localhost:8080/api/v1/tasks -H \"Content-Type: application/json\" -d '{\"title\":\"buy milk\"}'`
+  - `curl -s http://localhost:8080/api/v1/tasks/1`
+</Hints>
 </Task>

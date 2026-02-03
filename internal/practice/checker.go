@@ -49,6 +49,14 @@ func (c *Checker) Check(ctx context.Context, taskID int64, code string) (*CheckR
 		}, nil
 	}
 
+	// Manual-задачи выполняются вне встроенного редактора.
+	if strings.TrimSpace(task.Mode) == "manual" {
+		return &CheckResult{
+			Success: false,
+			Error:   "Это ручное задание. Выполните его в IDE и нажмите «Отметить выполненным».",
+		}, nil
+	}
+
 	// Создаём запись о submissions
 	submission := &progress.Submission{
 		TaskID: taskID,

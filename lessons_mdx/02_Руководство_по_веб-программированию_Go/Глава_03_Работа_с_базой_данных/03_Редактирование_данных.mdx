@@ -524,107 +524,48 @@ UPDATE ... WHERE id = ? AND version = ?
 ```
 </Pitfalls>
 
-<Task id="1" points="10">
-<Title>Задание 1: MongoDB driver</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Редактирование данных (UPDATE + RowsAffected)</Title>
 <Prompt>
-Подключитесь к MongoDB.
+Добавьте возможность **редактировать существующую задачу** и менять её статус.
+
+### Требования
+
+1) **DB слой**
+- Реализуйте обновление в репозитории:
+  - обновление `title`
+  - обновление `done`
+- Возвращайте “не найдено”, если `RowsAffected == 0`.
+
+2) **HTTP API**
+Реализуйте один из вариантов (на выбор):
+- `PUT /api/v1/tasks/{id}` (полная замена) или
+- `PATCH /api/v1/tasks/{id}` (частичное обновление)
+
+3) **HTML UI**
+- `GET /tasks/{id}/edit` — форма редактирования
+- `POST /tasks/{id}` (или отдельный путь) — применяет изменения и редиректит на `/tasks/{id}`
+
+4) **Валидация**
+- title не может быть пустым
+
 </Prompt>
-<StarterCode>
-```go
-package main
+<Criteria>
+- Обновление задачи сохраняется в БД и видно после рестарта
+- Для несуществующего `id` API возвращает 404 (или 400 — но объясните почему в README)
+- В коде есть проверка `RowsAffected` (не “молча ничего не сделал”)
+</Criteria>
+<Hints>
+- Для SQLite обновление обычно выглядит так:
 
-import "fmt"
-
-func main() {
-    fmt.Println("MongoDB: mongo.Connect(ctx, options.Client().ApplyURI(uri))")
-}
+```sql
+UPDATE tasks SET title = ?, done = ? WHERE id = ?
 ```
-</StarterCode>
-<ExpectedOutput>
-MongoDB: mongo.Connect(ctx, options.Client().ApplyURI(uri))
-</ExpectedOutput>
-</Task>
 
-<Task id="2" points="10">
-<Title>Задание 2: MongoDB Insert</Title>
-<Prompt>
-Вставьте документ.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Insert: collection.InsertOne(ctx, doc)")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Insert: collection.InsertOne(ctx, doc)
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: MongoDB Find</Title>
-<Prompt>
-Найдите документы.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Find: cursor, _ := collection.Find(ctx, filter)")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Find: cursor, _ := collection.Find(ctx, filter)
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="15">
-<Title>Задание 4: MongoDB Update</Title>
-<Prompt>
-Обновите документ.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Update: collection.UpdateOne(ctx, filter, bson.M{\"$set\": update})")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Update: collection.UpdateOne(ctx, filter, bson.M{"$set": update})
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="20">
-<Title>Задание 5: MongoDB aggregation</Title>
-<Prompt>
-Используйте aggregation pipeline.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Aggregate: collection.Aggregate(ctx, pipeline)")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Aggregate: collection.Aggregate(ctx, pipeline)
-</ExpectedOutput>
+- Для PATCH удобно принимать JSON вида `{ "title": "...", "done": true }`.
+- Самопроверка:
+  - создать задачу
+  - обновить title/done
+  - получить задачу и убедиться, что поля изменились
+</Hints>
 </Task>

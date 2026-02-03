@@ -145,45 +145,26 @@ SELECT * FROM users WHERE email = 'user@example.com';
 - `https://www.postgresql.org/docs/current/using-explain.html`
 </Links>
 
-<Task id="1" points="10">
-<Title>Задание 1: Настройте пул соединений</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: database/sql “как в проде” (пул, tx, EXPLAIN)</Title>
 <Prompt>
-В capstone REST проекте настройте пул `database/sql` (или эквивалент для вашего драйвера). Добавьте логирование `db.Stats()` (периодически или по endpoint) для наблюдаемости.
+Сделайте работу с Postgres более “производственной”: настройки пула, транзакции, и понимание планов запросов.
+
+### Требования
+
+1) **Пул соединений**
+- Настройте `SetMaxOpenConns`, `SetMaxIdleConns`, `SetConnMaxLifetime`, `SetConnMaxIdleTime`\n- Добавьте наблюдаемость: логируйте `db.Stats()` (периодически или через debug endpoint)
+
+2) **Транзакция**
+- Выберите одну бизнес‑операцию (например, создание заказа + позиции + списание stock)\n- Сделайте её атомарной через `BeginTx` + `Commit/Rollback`\n- Все запросы выполняйте с `context.Context` и таймаутами
+
+3) **EXPLAIN + индекс**
+- Возьмите один “тяжёлый” SELECT (например, поиск продуктов по имени или список заказов пользователя)\n- Запустите `EXPLAIN (ANALYZE, BUFFERS)`\n- Добавьте индекс, который улучшает план, и покажите “до/после”
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("db pool configured + stats observable")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-db pool configured + stats observable
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Транзакция для бизнес‑операции</Title>
-<Prompt>
-Выберите одну бизнес‑операцию (например, создание заказа + списание товара/баланса) и сделайте её атомарной через транзакцию (`BeginTx` + `Commit/Rollback`).
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("tx: business operation is atomic")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-tx: business operation is atomic
-</ExpectedOutput>
+<Criteria>
+- Пул настроен и значения обоснованы\n- Бизнес‑операция атомарна (нет частичных записей)\n- Есть конкретный пример EXPLAIN до/после и применённый индекс\n</Criteria>
+<Hints>
+- Индексы часто нужны на: `(user_id, created_at)` для списков и на `lower(name)`/GIN trgm для поиска.\n- EXPLAIN лучше с реальными данными (хотя бы небольшим seed).\n</Hints>
 </Task>
 

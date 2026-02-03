@@ -141,45 +141,38 @@ services:
 - `https://github.com/open-telemetry/opentelemetry-go`
 </Links>
 
-<Task id="1" points="10">
-<Title>Задание 1: Где в проекте должны появиться spans?</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: OpenTelemetry Tracing в capstone (init + spans + shutdown)</Title>
 <Prompt>
-Составьте список мест для tracing в capstone REST проекте: входящий HTTP, исходящие HTTP/gRPC, SQL запросы, бизнес‑операции. Для каждого пункта — что будет названием span и какие атрибуты важны.
+Подключите OpenTelemetry tracing к вашему capstone‑сервису и добейтесь того, чтобы трейсы стабильно доходили до backend’а (Jaeger/Tempo).
+
+### Требования
+
+1) **Инициализация SDK**
+- TracerProvider + OTLP exporter (grpc или http)
+- Resource атрибуты: `service.name`, `service.version` (если есть), `deployment.environment`
+- Сэмплирование (в dev можно AlwaysOn, но опишите варианты)
+
+2) **Graceful shutdown**
+- При завершении сервиса корректно вызывается `Shutdown(ctx)` у tracer provider/exporter\n- Трейсы не “теряются” при остановке
+
+3) **Spans в ключевых местах**
+- Минимум:
+  - входящий запрос (HTTP или gRPC)
+  - 1 usecase span (бизнес операция)
+  - 1 DB span (SQL/ORM)
+- Осмысленные имена span’ов и атрибуты (без высокой кардинальности)
+
+4) **Локальная проверка**
+- Поднимите Jaeger/Tempo + otel-collector (docker-compose)
+- Убедитесь, что trace виден и содержит несколько span’ов
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("spans: http in/out, db, business ops + attrs")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-spans: http in/out, db, business ops + attrs
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Инициализация OTel + graceful shutdown</Title>
-<Prompt>
-Добавьте инициализацию OpenTelemetry Tracing (OTLP exporter) и корректный shutdown при SIGTERM/SIGINT. Убедитесь, что трейсы не теряются при остановке.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("otel init + shutdown on signal")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-otel init + shutdown on signal
-</ExpectedOutput>
+<Criteria>
+- Есть работающий локальный стенд (compose) и команда запуска
+- В Jaeger/Tempo видно trace дерево (не один span)\n- В README описано, какие spans где создаются и какие атрибуты пишутся
+</Criteria>
+<Hints>
+- Не кладите user_id/email/uuid в атрибуты каждого span’а без необходимости.\n- Главное правило: всегда протаскивайте `ctx`.\n</Hints>
 </Task>
 

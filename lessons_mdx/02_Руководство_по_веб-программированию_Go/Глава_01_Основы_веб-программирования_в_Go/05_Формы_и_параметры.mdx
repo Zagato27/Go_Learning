@@ -544,107 +544,43 @@ r.PostFormValue("key")  // только POST
 ```
 </Pitfalls>
 
-<Task id="1" points="10">
-<Title>Задание 1: Логирование</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Формы и параметры (HTML form + PRG + валидация)</Title>
 <Prompt>
-Используйте structured logging.
+Добавьте к мини‑приложению **HTML интерфейс** для создания/просмотра задач (в дополнение к вашему REST API).
+
+### Требования
+
+1) **Страницы**
+- `GET /tasks/new` — HTML форма создания задачи (минимум поле `title`)
+- `POST /tasks` — принимает form‑данные (`application/x-www-form-urlencoded`) и создаёт задачу
+- `GET /tasks/{id}` — HTML страница одной задачи
+
+2) **PRG (Post/Redirect/Get)**
+- После успешного `POST /tasks` делайте redirect на `/tasks/{id}` (303 или 302)
+
+3) **Валидация**
+- `title` обязателен, минимум 3 символа
+- При ошибке валидации возвращайте форму с сообщением об ошибке (не 500)
+
+4) **Параметры**
+- Используйте одновременно:
+  - path params (`{id}`)
+  - query params (например, `?next=/tasks/123` или `?debug=1`) — на ваше усмотрение
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Логирование: zerolog, zap, или slog")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Логирование: zerolog, zap, или slog
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="10">
-<Title>Задание 2: slog из std</Title>
-<Prompt>
-Используйте встроенный slog.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("slog: slog.Info(\"message\", \"key\", value)")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-slog: slog.Info("message", "key", value)
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="10">
-<Title>Задание 3: Уровни логов</Title>
-<Prompt>
-Настройте уровни логирования.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Уровни: Debug, Info, Warn, Error")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Уровни: Debug, Info, Warn, Error
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="15">
-<Title>Задание 4: JSON формат логов</Title>
-<Prompt>
-Выводите логи в JSON.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("JSON: {\"level\":\"info\",\"msg\":\"message\",\"time\":\"...\"}")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-JSON: {"level":"info","msg":"message","time":"..."}
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="15">
-<Title>Задание 5: Request ID</Title>
-<Prompt>
-Добавьте request ID в логи.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Request ID: uuid для трейсинга запросов")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Request ID: uuid для трейсинга запросов
-</ExpectedOutput>
+<Criteria>
+- `GET /tasks/new` возвращает HTML с `<form method=\"POST\" action=\"/tasks\">`
+- `POST /tasks` создаёт задачу и редиректит на страницу созданной задачи
+- Некорректный `id` / несуществующий `id` обрабатывается корректно (404/400)
+- При пустом `title` форма возвращается с ошибкой (и без создания записи)
+</Criteria>
+<Hints>
+- Для form‑данных используйте `r.ParseForm()` и `r.FormValue(\"title\")`.
+- Для редиректа: `http.Redirect(w, r, url, http.StatusSeeOther)`.
+- Самопроверка:
+  - `curl -i http://localhost:8080/tasks/new`
+  - `curl -i -X POST http://localhost:8080/tasks -H \"Content-Type: application/x-www-form-urlencoded\" -d \"title=buy+milk\"`
+  - `curl -i -X POST http://localhost:8080/tasks -H \"Content-Type: application/x-www-form-urlencoded\" -d \"title=\"`
+</Hints>
 </Task>

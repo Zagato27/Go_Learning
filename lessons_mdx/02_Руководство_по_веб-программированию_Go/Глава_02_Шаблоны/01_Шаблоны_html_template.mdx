@@ -430,107 +430,40 @@ import "html/template"
 ```
 </Pitfalls>
 
-<Task id="1" points="15">
-<Title>Задание 1: Unit тесты</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: html/template — серверный рендеринг для мини‑приложения</Title>
 <Prompt>
-Напишите unit тест для handler.
+Переведите HTML‑ответы вашего мини‑приложения на `html/template`.
+
+### Требования
+
+1) **Шаблоны**
+- Создайте папку `templates/`
+- Сделайте базовый layout (шапка/футер) и 2 страницы:
+  - список задач
+  - страница одной задачи
+- Для формы создания задачи (из прошлой лабы) — отдельный шаблон или часть layout
+
+2) **Данные**
+- Передавайте в шаблон структурированные данные (`struct`), а не `map[string]any` (минимум для одной страницы).
+
+3) **Безопасность**
+- Убедитесь, что пользовательский ввод экранируется (используйте `html/template`, а не `text/template`).
+
+4) **Ошибки**
+- Ошибки парсинга/выполнения шаблона не должны падать паникой в рантайме (используйте `template.Must` только на старте или корректно обрабатывайте ошибки).
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Unit: httptest.NewRecorder(), httptest.NewRequest()")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Unit: httptest.NewRecorder(), httptest.NewRequest()
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Моки</Title>
-<Prompt>
-Используйте моки для зависимостей.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Моки: интерфейсы + testify/mock")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Моки: интерфейсы + testify/mock
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="20">
-<Title>Задание 3: Integration тесты</Title>
-<Prompt>
-Напишите интеграционный тест.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Integration: реальная БД + httptest.Server")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Integration: реальная БД + httptest.Server
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="15">
-<Title>Задание 4: TestMain</Title>
-<Prompt>
-Настройте TestMain.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("TestMain: func TestMain(m *testing.M) { setup(); m.Run(); teardown() }")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-TestMain: func TestMain(m *testing.M) { setup(); m.Run(); teardown() }
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="10">
-<Title>Задание 5: Test coverage</Title>
-<Prompt>
-Измерьте покрытие тестами.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Coverage: go test -cover ./...")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Coverage: go test -cover ./...
-</ExpectedOutput>
+<Criteria>
+- `GET /tasks/{id}` отдаёт HTML, сформированный через `html/template`
+- В шаблоне используется layout (не копипаста одного и того же HTML)
+- В данных есть минимум: `title`, `done`, `id`
+- Если в title есть `<script>`, то в HTML он отображается как текст (экранируется)
+</Criteria>
+<Hints>
+- Удобный паттерн: на старте `ParseGlob("templates/*.html")` или `ParseFS(...)`, затем `ExecuteTemplate(w, "page.html", data)`.
+- Для вложенных шаблонов используйте `{{define \"base\"}}...{{end}}` и `{{template \"base\" .}}`.
+- Самопроверка:
+  - Откройте в браузере страницу задачи с “опасным” title (проверьте экранирование).
+</Hints>
 </Task>

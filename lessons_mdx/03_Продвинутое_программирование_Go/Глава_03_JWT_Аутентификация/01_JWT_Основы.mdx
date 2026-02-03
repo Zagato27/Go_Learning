@@ -481,107 +481,56 @@ func main() {
 ```
 </Examples>
 
-<Task id="1" points="15">
-<Title>Задание 1: Генерация и проверка JWT</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: JWT Auth для REST capstone (access/refresh + роли)</Title>
 <Prompt>
-Реализуйте базовую JWT аутентификацию.
+Реализуйте полноценный auth‑слой для REST capstone.
+
+Ориентир по требованиям: `lessons_mdx/Проекты/capstone-rest.md`.
+
+### Требования
+
+1) **Пользователи**
+- Регистрация: хранить пароль как bcrypt‑хэш
+- Логин: проверка пароля, выдача токенов
+
+2) **Токены**
+- Access JWT (короткий TTL, например 15 минут)
+- Refresh token (длинный TTL, например 7–30 дней)
+- Обновление токена: `POST /auth/refresh` (refresh → новый access, опционально rotate refresh)
+
+3) **Logout / Revocation**
+- Реализуйте отзыв refresh‑токена:
+  - через БД (таблица refresh_sessions) или
+  - через Redis (если уже используете)
+
+4) **Middleware**
+- `AuthMiddleware`:
+  - достаёт Bearer token из заголовка
+  - валидирует подпись/exp
+  - кладёт `user_id`, `role` в context
+- `RequireRole("admin")` для admin‑эндпоинтов (например, `POST /products`)
+
+5) **Ошибки**
+- 401 для невалидного/просроченного access
+- 403 для “роль не подходит”
+- единый JSON формат ошибок
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Refresh Token</Title>
-<Prompt>
-Реализуйте систему с access и refresh токенами.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Token Blacklist</Title>
-<Prompt>
-Реализуйте blacklist для отозванных токенов.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="4" points="10">
-<Title>Задание 4: Login/Logout Handlers</Title>
-<Prompt>
-Создайте полный flow аутентификации.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
-</Task>
-
-<Task id="5" points="10">
-<Title>Задание 5: Role-Based Access</Title>
-<Prompt>
-Реализуйте middleware для проверки ролей.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-// TODO: Реализуйте решение согласно заданию
-
-func main() {
-    // Ваш код здесь
-    
-}
-```
-</StarterCode>
+<Criteria>
+- Регистрация/логин/refresh/logout работают end‑to‑end
+- Access token реально защищает эндпоинты (без токена → 401)
+- Admin‑эндпоинты требуют роль admin (user → 403)
+- После logout refresh больше не работает
+</Criteria>
+<Hints>
+- Рекомендуемая структура: `internal/usecase/auth`, `internal/transport/http/auth`, `internal/repo/...`.
+- Для JWT можно использовать `github.com/golang-jwt/jwt/v5` или любую другую библиотеку, но не пишите JWT “вручную”.
+- Самопроверка (примерный сценарий):
+  - зарегистрироваться
+  - залогиниться, получить access/refresh
+  - сходить в защищённый endpoint с access
+  - обновить access через refresh
+  - разлогиниться и убедиться, что refresh отозван
+</Hints>
 </Task>

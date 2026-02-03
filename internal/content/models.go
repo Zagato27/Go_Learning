@@ -78,6 +78,7 @@ type Task struct {
 	TestsGo          string
 	ExpectedOutput   string // Ожидаемый вывод программы
 	RequiredPatterns string // Паттерны, которые должны быть в коде (разделённые |)
+	Mode             string // auto (встроенная проверка) / manual (выполнение в IDE)
 	Points           int
 	OrderIndex       int
 }

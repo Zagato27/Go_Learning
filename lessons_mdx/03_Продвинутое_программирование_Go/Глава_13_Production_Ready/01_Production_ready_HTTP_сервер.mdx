@@ -150,67 +150,29 @@ func main() {
 - `https://pkg.go.dev/os/signal`
 </Links>
 
-<Task id="1" points="10">
-<Title>Задание 1: Таймауты сервера</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Production‑ready HTTP сервер (timeouts, health/readiness, shutdown)</Title>
 <Prompt>
-Добавьте таймауты `ReadHeaderTimeout/ReadTimeout/WriteTimeout/IdleTimeout` в capstone REST проект (Gin). Обоснуйте выбранные значения.
+Доведите HTTP слой capstone‑сервиса до production‑минимума.
+
+### Требования
+
+1) **Timeouts**
+- Настройте timeouts у `http.Server`:\n  - `ReadHeaderTimeout`\n  - `ReadTimeout`\n  - `WriteTimeout`\n  - `IdleTimeout`\n- Обоснуйте значения в README (какие угрозы/проблемы закрываем)
+
+2) **Лимиты**
+- Ограничьте размер тела запроса (например, `MaxBytesReader` или лимит на уровне Gin)\n- (опционально) добавьте rate limiting или concurrency limit
+
+3) **Health endpoints**
+- `/healthz` (liveness) — ok, пока процесс жив\n- `/readyz` (readiness) — проверяет зависимости (БД/кэш/очереди)\n- При проблемах с зависимостями `/readyz` возвращает 503
+
+4) **Graceful shutdown**
+- При SIGINT/SIGTERM:\n  - перестать принимать новые запросы\n  - дождаться текущих в пределах таймаута\n  - закрыть ресурсы (DB/otel/exporter)
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("http timeouts: configured + rationale")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-http timeouts: configured + rationale
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="10">
-<Title>Задание 2: /healthz и /readyz</Title>
-<Prompt>
-Добавьте endpoints `/healthz` и `/readyz`. `/readyz` должен учитывать состояние БД (и/или других зависимостей) и возвращать 503, если сервис не готов.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("healthz/readyz: implemented")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-healthz/readyz: implemented
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Graceful shutdown</Title>
-<Prompt>
-Реализуйте корректный shutdown (SIGTERM) так, чтобы:
-1) новые запросы не принимались, 2) текущие завершались в пределах таймаута, 3) ресурсы закрывались (DB/otel).
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("graceful shutdown: done")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-graceful shutdown: done
-</ExpectedOutput>
+<Criteria>
+- `/healthz` и `/readyz` работают согласно описанию\n- При выключенной БД `/readyz` отдаёт 503\n- Таймауты действительно заданы и задокументированы\n- При остановке сервиса нет зависаний, shutdown корректный\n</Criteria>
+<Hints>
+- Для сигналов используйте `signal.NotifyContext`.\n- Для readiness проверки делайте `PingContext` с таймаутом.\n- Для Gin удобно запускать `http.Server` вручную, а не через `r.Run()`.\n</Hints>
 </Task>
 

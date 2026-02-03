@@ -494,23 +494,31 @@ issues:
 ```
 </Examples>
 
-<Task id="1" points="15">
-<Title>Задание 1: CI Pipeline с тестами</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: CI для capstone (lint + -race + build + docker)</Title>
 <Prompt>
-Настройте CI с тестами и линтером.
-</Prompt>
-</Task>
+Настройте CI (GitHub Actions) для capstone‑проекта так, чтобы он был максимально близок к прод‑ожиданиям.
 
-<Task id="2" points="15">
-<Title>Задание 2: Docker Build и Push</Title>
-<Prompt>
-Создайте workflow для сборки Docker образа.
-</Prompt>
-</Task>
+### Требования (минимум)
 
-<Task id="3" points="10">
-<Title>Задание 3: Release с GoReleaser</Title>
-<Prompt>
-Настройте автоматические релизы.
+1) **Триггеры**
+- `push` и `pull_request` в main ветку
+
+2) **Шаги**
+- `go test -race -cover ./...`
+- `golangci-lint run`
+- `go build ./...`
+
+3) **Docker**
+- Сборка docker image (хотя бы `docker build`)\n- (опционально) push в registry по тегу\n
+4) **Кэширование**
+- Используйте cache для `go` модулей (через `actions/setup-go` cache или `actions/cache`).
+
+5) **Качество**
+- CI должен падать при любом из:\n  - fail тестов\n  - fail линта\n  - fail сборки\n
 </Prompt>
+<Criteria>
+- В репозитории есть `.github/workflows/ci.yml` (или похожее)\n- Workflow стабильно проходит на green‑ветке\n- В README описано, как локально повторить CI шаги\n</Criteria>
+<Hints>
+- Для линта используйте `golangci/golangci-lint-action`.\n- Для docker build можно использовать `docker/build-push-action` (даже без push).\n- Самопроверка:\n  - откройте PR и убедитесь, что workflow реально запускается и блокирует merge при ошибках\n</Hints>
 </Task>

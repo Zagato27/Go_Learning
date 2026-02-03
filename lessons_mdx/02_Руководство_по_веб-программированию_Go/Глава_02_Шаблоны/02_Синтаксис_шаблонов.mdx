@@ -629,107 +629,42 @@ func main() {
 ```
 </Pitfalls>
 
-<Task id="1" points="10">
-<Title>Задание 1: Docker образ</Title>
+<Task id="lab" mode="manual" points="60">
+<Title>Лаба: Синтаксис шаблонов (range/if/with/partials/FuncMap)</Title>
 <Prompt>
-Создайте Dockerfile для Go.
+Прокачайте UI мини‑приложения, используя возможности `html/template`.
+
+### Требования
+
+1) **Условия и ветвления**
+- На странице списка задач:
+  - если задач нет — показывать “Пока нет задач”
+  - если есть — показывать список
+- Для каждой задачи показывать бейдж `done / todo` (через `if`).
+
+2) **range + else**
+- Используйте `{{ range ... }} ... {{ else }} ... {{ end }}` хотя бы в одном месте.
+
+3) **partials**
+- Вынесите повторяющийся фрагмент (например, “строка задачи” или “шапка страницы”) в отдельный `{{define}}` и подключайте через `{{template}}`.
+
+4) **FuncMap**
+- Добавьте хотя бы 1 template‑функцию (например, форматирование времени или обрезка строки).
+
+5) **Контекст**
+- Внутри `range` продемонстрируйте доступ к корневому контексту через `$` (например, заголовок страницы `$.Title`).
+
 </Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Dockerfile: FROM golang:1.22, COPY, RUN go build")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Dockerfile: FROM golang:1.22, COPY, RUN go build
-</ExpectedOutput>
-</Task>
-
-<Task id="2" points="15">
-<Title>Задание 2: Multi-stage build</Title>
-<Prompt>
-Оптимизируйте образ.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Multi-stage: builder image + scratch/alpine")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Multi-stage: builder image + scratch/alpine
-</ExpectedOutput>
-</Task>
-
-<Task id="3" points="15">
-<Title>Задание 3: Docker Compose</Title>
-<Prompt>
-Настройте docker-compose.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Compose: services: app, db, redis")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Compose: services: app, db, redis
-</ExpectedOutput>
-</Task>
-
-<Task id="4" points="15">
-<Title>Задание 4: Health checks</Title>
-<Prompt>
-Добавьте healthcheck endpoint.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Health: GET /health -> {\"status\": \"ok\"}")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Health: GET /health -> {"status": "ok"}
-</ExpectedOutput>
-</Task>
-
-<Task id="5" points="10">
-<Title>Задание 5: Environment variables</Title>
-<Prompt>
-Конфигурация через env.
-</Prompt>
-<StarterCode>
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Env: os.Getenv(\"DATABASE_URL\")")
-}
-```
-</StarterCode>
-<ExpectedOutput>
-Env: os.Getenv("DATABASE_URL")
-</ExpectedOutput>
+<Criteria>
+- В шаблонах присутствуют `range + else`, `if/else`, `define/template`
+- Есть минимум одна функция из `FuncMap`, реально используемая в шаблоне
+- UI корректно отображается в обоих состояниях: пустой список и непустой
+</Criteria>
+<Hints>
+- Хороший паттерн: `templates/base.html`, `templates/tasks.html`, `templates/task.html`, плюс `templates/partials.html`.
+- Не забывайте про trim‑операторы `{{-` и `-}}`, чтобы не плодить лишние пробелы/переводы строк.
+- Самопроверка:
+  - запустите приложение с пустым списком задач
+  - создайте 1–2 задачи и проверьте рендер списка
+</Hints>
 </Task>

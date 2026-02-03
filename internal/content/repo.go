@@ -3,6 +3,7 @@ package content
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 )
 
 // Repository — репозиторий для работы с контентом.
@@ -358,10 +359,13 @@ func (r *Repository) GetSectionsByLessonID(lessonID int64) ([]Section, error) {
 
 // CreateTask создаёт задание.
 func (r *Repository) CreateTask(t *Task) error {
+	if strings.TrimSpace(t.Mode) == "" {
+		t.Mode = "auto"
+	}
 	result, err := r.db.Exec(
-		`INSERT INTO tasks (lesson_id, title, prompt_md, criteria, hints, starter_code, tests_go, expected_output, required_patterns, points, order_index)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		t.LessonID, t.Title, t.PromptMD, t.Criteria, t.Hints, t.StarterCode, t.TestsGo, t.ExpectedOutput, t.RequiredPatterns, t.Points, t.OrderIndex,
+		`INSERT INTO tasks (lesson_id, title, prompt_md, criteria, hints, starter_code, tests_go, expected_output, required_patterns, mode, points, order_index)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		t.LessonID, t.Title, t.PromptMD, t.Criteria, t.Hints, t.StarterCode, t.TestsGo, t.ExpectedOutput, t.RequiredPatterns, t.Mode, t.Points, t.OrderIndex,
 	)
 	if err != nil {
 		return fmt.Errorf("insert task: %w", err)
@@ -386,6 +390,7 @@ func (r *Repository) GetTasksByLessonID(lessonID int64) ([]Task, error) {
 		        starter_code, tests_go, 
 		        COALESCE(expected_output, '') as expected_output,
 		        COALESCE(required_patterns, '') as required_patterns,
+		        COALESCE(mode, 'auto') as mode,
 		        points, order_index
 		 FROM tasks WHERE lesson_id = ? ORDER BY order_index`,
 		lessonID,
@@ -398,7 +403,7 @@ func (r *Repository) GetTasksByLessonID(lessonID int64) ([]Task, error) {
 	var tasks []Task
 	for rows.Next() {
 		var t Task
-		if err := rows.Scan(&t.ID, &t.LessonID, &t.Title, &t.PromptMD, &t.Criteria, &t.Hints, &t.StarterCode, &t.TestsGo, &t.ExpectedOutput, &t.RequiredPatterns, &t.Points, &t.OrderIndex); err != nil {
+		if err := rows.Scan(&t.ID, &t.LessonID, &t.Title, &t.PromptMD, &t.Criteria, &t.Hints, &t.StarterCode, &t.TestsGo, &t.ExpectedOutput, &t.RequiredPatterns, &t.Mode, &t.Points, &t.OrderIndex); err != nil {
 			return nil, fmt.Errorf("scan task: %w", err)
 		}
 		tasks = append(tasks, t)
@@ -417,10 +422,11 @@ func (r *Repository) GetTaskByID(id int64) (*Task, error) {
 		        starter_code, tests_go, 
 		        COALESCE(expected_output, '') as expected_output, 
 		        COALESCE(required_patterns, '') as required_patterns, 
+		        COALESCE(mode, 'auto') as mode,
 		        points, order_index
 		 FROM tasks WHERE id = ?`,
 		id,
-	).Scan(&t.ID, &t.LessonID, &t.Title, &t.PromptMD, &t.Criteria, &t.Hints, &t.StarterCode, &t.TestsGo, &t.ExpectedOutput, &t.RequiredPatterns, &t.Points, &t.OrderIndex)
+	).Scan(&t.ID, &t.LessonID, &t.Title, &t.PromptMD, &t.Criteria, &t.Hints, &t.StarterCode, &t.TestsGo, &t.ExpectedOutput, &t.RequiredPatterns, &t.Mode, &t.Points, &t.OrderIndex)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
