@@ -487,6 +487,11 @@ func (m *MDXImporter) findGuides() ([]DirEntry, error) {
 		}
 
 		name := entry.Name()
+		// Служебные директории/метаданные — не считаем отдельными курсами.
+		// Например, lessons_mdx/Проекты содержит ТЗ capstone-проектов для страницы /projects.
+		if name == "Проекты" || strings.HasPrefix(name, ".") || strings.HasPrefix(name, "_") {
+			continue
+		}
 		order, title := m.parseNumberedName(name)
 
 		guides = append(guides, DirEntry{
